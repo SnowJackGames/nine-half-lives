@@ -220,17 +220,15 @@ func increment_active_level() -> void:
 func load_level(index : int) -> void:
 	# Unload whatever level is currently up
 	var walls : Node2D
-	if current_level:
-		walls = get_node("Levels/" + levels_scene.level_order[current_level_index].name + "/Elements/WallTiles")
-		if walls != null:
-			walls.collision_enabled = false
-		current_level.visible = false
-		current_level.process_mode = Node.PROCESS_MODE_DISABLED
+	
+	await $Levels.disable_all()
 	
 	player_character.reset_status()
 	current_level = get_node("Levels/" + str(levels_scene.level_order[index]))
 	current_level.visible = true
 	walls = get_node("Levels/" + levels_scene.level_order[index].name + "/Elements/WallTiles")
+	print("enabling:")
+	print(walls)
 	if walls != null:
 		walls.collision_enabled = true
 	current_level.process_mode = Node.PROCESS_MODE_INHERIT

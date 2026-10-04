@@ -953,6 +953,7 @@ tile_map_data = PackedByteArray("AAAOABMAAQALAAcAAAAPABMAAQAMAAcAAAAQABMAAQANAAc
 tile_set = SubResource("TileSet_ytqnt")
 
 [node name="Level1" parent="." unique_id=69772821 instance=ExtResource("2_5ekxl")]
+visible = false
 set_player_start_position = Vector2(144, 240)
 
 [node name="FloorTiles" type="TileMapLayer" parent="Level1" unique_id=1197915018]
@@ -1213,7 +1214,6 @@ position = Vector2(160, 160)
 tile_rotation_steps = 1
 
 [node name="Level4" parent="." unique_id=1468679079 instance=ExtResource("2_5ekxl")]
-visible = false
 set_player_start_position = Vector2(160, 208)
 
 [node name="FloorTiles" type="TileMapLayer" parent="Level4" unique_id=190985873]
@@ -1221,7 +1221,8 @@ tile_map_data = PackedByteArray("AAABABAAAAABAAEAAAABABEAAAABAAEAAAAGABIAAAABAAE
 tile_set = SubResource("TileSet_al877")
 
 [node name="Floor" parent="Level4" unique_id=200912535 instance=ExtResource("3_jj4e6")]
-floor_size = Vector2(320, 320)
+position = Vector2(-64, -112)
+floor_size = Vector2(480, 480)
 
 [node name="Camera2D" type="Camera2D" parent="Level4" unique_id=1439558832]
 position = Vector2(160, 176)
@@ -1249,7 +1250,7 @@ position = Vector2(208, 96)
 [node name="DecorativeWallTiles" type="TileMapLayer" parent="Level4/Elements" unique_id=1592786360]
 z_index = 2
 position = Vector2(240, 272)
-tile_map_data = PackedByteArray("AADv//b/AAAIAAEAAADv//f/AAAIAAIAAADx//b/AAAKAAEAAADx//f/AAAKAAIAAADz//b/AAAIAAEAAADz//f/AAAIAAIAAADv//X/AAAIAAEAAADx//X/AAAIAAEAAADz//X/AAAIAAEAAAADAPX/AQAHAAEAAAADAPb/AQAHAAIAAAADAPf/AQAHAAMAAAAEAPX/AQAIAAEAAAAEAPb/AQAIAAIAAAAEAPf/AQAIAAMAAAAFAPX/AQAJAAEAAAAFAPb/AQAJAAIAAAAFAPf/AQAJAAMAAAAGAPX/AQAKAAEAAAAGAPb/AQAKAAIAAAAGAPf/AQAKAAMAAAAHAPX/AQALAAEAAAAHAPb/AQALAAIAAAAHAPf/AQALAAMAAAAIAPX/AQAMAAEAAAAIAPb/AQAMAAIAAAAIAPf/AQAMAAMAAAAJAPX/AQANAAEAAAAJAPb/AQANAAIAAAAJAPf/AQANAAMAAAA=")
+tile_map_data = PackedByteArray("AAADAPX/AQAHAAEAAAADAPb/AQAHAAIAAAADAPf/AQAHAAMAAAAEAPX/AQAIAAEAAAAEAPb/AQAIAAIAAAAEAPf/AQAIAAMAAAAFAPX/AQAJAAEAAAAFAPb/AQAJAAIAAAAFAPf/AQAJAAMAAAAGAPX/AQAKAAEAAAAGAPb/AQAKAAIAAAAGAPf/AQAKAAMAAAAHAPX/AQALAAEAAAAHAPb/AQALAAIAAAAHAPf/AQALAAMAAAAIAPX/AQAMAAEAAAAIAPb/AQAMAAIAAAAIAPf/AQAMAAMAAAAJAPX/AQANAAEAAAAJAPb/AQANAAIAAAAJAPf/AQANAAMAAAA=")
 tile_set = SubResource("TileSet_12aps")
 
 [node name="WallTiles" type="TileMapLayer" parent="Level4/Elements" unique_id=1644731777]
