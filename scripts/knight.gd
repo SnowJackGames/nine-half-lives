@@ -64,8 +64,13 @@ func declare_knight() -> void:
 	var tile_detection_check_2 : Vector2
 	var tile_to_land_on : Vector2
 	for dir in knight_dir_to_vectors:
-		tile_detection_check_1 = (knight_dir_to_check_spots[dir][0] * Globals.grid_size) + player.position 
-		tile_detection_check_2 = (knight_dir_to_check_spots[dir][1] * Globals.grid_size) + player.position
+		tile_detection_check_1 = (knight_dir_to_check_spots[dir][0] * Globals.grid_size) + player.position + player.kitty_center_offset
+		tile_detection_check_2 = (knight_dir_to_check_spots[dir][1] * Globals.grid_size) + player.position + player.kitty_center_offset
+		print(dir)
+		print(player.position)
+		print(tile_detection_check_1)
+		print(tile_detection_check_2)
+		print()
 		# if at least one tile_detection.pounceoverable in knight_dir_to_check_spots
 		if tile_detection.pounceoverable(tile_detection_check_1) or tile_detection.pounceoverable(tile_detection_check_2):
 			tile_to_land_on = (knight_dir_to_vectors[dir] * Globals.grid_size) + player.position
@@ -128,6 +133,7 @@ func attempt_knight(valid_dir: Array) -> void:
 	if Globals.game_mode == 2:
 		Globals.ui.attack_combat_return_hover()
 		var chose_option := false
+		var attacking := false
 		while !chose_option and !Globals.GameManager.should_abandon_turn():
 			# Don't process while paused
 			if Globals.GameManager.paused:
@@ -136,10 +142,12 @@ func attempt_knight(valid_dir: Array) -> void:
 				for dir in player.dir_inputs.keys():
 					# (A) accept
 					if Input.is_action_pressed("ui_accept") and !Input.is_action_pressed("ui_cancel"):
+						attacking = true
 						chose_option = true
 						break
 					# (B) cancel
 					elif Input.is_action_pressed("ui_cancel") and !Input.is_action_pressed("ui_accept"):
+						attacking = false
 						chose_option = true
 						break
 					# If a direction is pressed, *flip* which of the two knight moves is being selected
@@ -228,8 +236,9 @@ func attempt_knight(valid_dir: Array) -> void:
 							push_error("somehow invalid direction given in attempt_knight")
 						break
 			await player.get_tree().create_timer(0.1).timeout
-		if chose_option:
-			await Globals.inputs_clear()
+		await Globals.inputs_clear()
+		if attacking:
+			player.can_action = false
 			enact_knight()
 		else:
 			knight_hint([], false)

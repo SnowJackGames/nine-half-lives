@@ -43,7 +43,7 @@ func next_turn() -> void:
 	
 	#region Enemy Phases
 	if !should_abandon_turn():
-		calc_ai_array()
+		await calc_ai_array()
 		if ai_array:
 			Globals.game_mode = 2
 			await enemy_phase_one()
@@ -59,7 +59,7 @@ func next_turn() -> void:
 		
 	#region Player Phases
 	if !should_abandon_turn():
-		calc_ai_array() # in case any AI died during their turn
+		await calc_ai_array() # in case any AI died during their turn
 		if ai_array:
 			Globals.game_mode = 2
 		else:
@@ -79,8 +79,9 @@ func next_turn() -> void:
 	#region Next Enemy Phases
 	if !should_abandon_turn():
 		# Recalc array after player turn
-		calc_ai_array()
+		await calc_ai_array()
 		if ai_array:
+			Globals.game_mode = 2
 			await enemy_phase_two()
 		else:
 			Globals.game_mode = 1
@@ -93,13 +94,13 @@ func next_turn() -> void:
 	#region End of Turn Handling
 	if !should_abandon_turn():
 		# Unlock stairs
-		calc_ai_array()
+		await calc_ai_array()
 		if !ai_array:
 			if current_level.get_node("Elements/Stairs"):
 				current_level.get_node("Elements/Stairs").unlock()
 
 		if player_character.on_level_exit:
-			increment_active_level()
+			await increment_active_level()
 	else:
 		Debug.say("abandoning turn\n--------")
 		await get_tree().create_timer(0.01).timeout
@@ -264,6 +265,9 @@ func increment_active_level() -> void:
 		Globalaudio.play_music_level(blurr)
 	if current_level.name == "Level15": 
 		Globalaudio.play_music_level(emerald)
+	
+	await get_tree().create_timer(0.1).timeout
+
 
 func update_camera_target() -> void: 	
 	$Player/RemoteTransform2D.remote_path = NodePath("")  
@@ -291,12 +295,19 @@ func should_abandon_turn() -> bool:
 
 # calculate ai_array
 func calc_ai_array() -> void:
+	# Wait one single frame to make sure any enemies that disappeared with queue_free() are gone
 	var unsorted_array : Array[CharacterBody2D] = []
 	# search to see if any enemies
 	
 	for child in current_level.find_children("*", "CharacterBody2D"):
 		if "is_enemy" in child or child.get("is_enemy"):
-			unsorted_array.append(child)
+			if "is_alive" in child:
+				if !child.is_alive:
+					# remove the entity, then wait one frame for it to disappear
+					child.queue_free()
+					await get_tree().process_frame
+				else:
+					unsorted_array.append(child)
 
 	# sort them left to right, top to bottom
 	# but for now
@@ -329,7 +340,7 @@ func _ready() -> void:
 	show()
 	levels_scene.show()
 	player_character.show()
-	increment_active_level()
+	await increment_active_level()
 	next_turn()
 
 	

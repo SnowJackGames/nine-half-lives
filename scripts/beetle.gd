@@ -12,8 +12,7 @@ extends CharacterBody2D
 @onready var landonable := true
 @onready var moveonable := false
 @onready var is_enemy := true
-@onready var died := false
-@onready var is_alive := true
+@onready var is_alive : bool
 
 const beetle_center_offset := Vector2(8,8)
 
@@ -133,6 +132,7 @@ func end_turn() -> void:
 	pass
 	
 func _ready() -> void:
+	is_alive = true
 	cur_health = 3
 	$MoveHint.hide()
 	$AttackHint.hide()
@@ -149,38 +149,38 @@ func phase_one() -> void:
 	
 	# Determine direction of player
 	var tile_detection_check : Vector2
-	var closest_tile_to_player := position
-	var furthest_tile_to_player := position
-	var closest_distance_to_player := position.distance_to(player.position)
-	var furthest_distance_to_player := position.distance_to(player.position)
+	var closest_tile_to_player := position + beetle_center_offset
+	var furthest_tile_to_player := position + beetle_center_offset
+	var closest_distance_to_player := closest_tile_to_player.distance_to(player.position + beetle_center_offset)
+	var furthest_distance_to_player := furthest_tile_to_player.distance_to(player.position + beetle_center_offset)
 		
 	# For every direction, figure out the closest and furthest tile to player
 	for direction in direction_dictionary:
-		tile_detection_check = direction_dictionary[direction] * Globals.grid_size + position
+		tile_detection_check = direction_dictionary[direction] * Globals.grid_size + position + beetle_center_offset
 		if tile_detection.moveonable(tile_detection_check) and !tile_detection.tile_damage_ground(tile_detection_check):
 			# replace with closer spot
-			if tile_detection_check.distance_to(player.position) < closest_distance_to_player:
+			if tile_detection_check.distance_to(player.position + beetle_center_offset) < closest_distance_to_player:
 				closest_tile_to_player = tile_detection_check
 				closest_distance_to_player = tile_detection_check.distance_to(player.position)
 				direction_towards_player = direction
 			# replace with further spot
-			if tile_detection_check.distance_to(player.position) > furthest_distance_to_player:
+			if tile_detection_check.distance_to(player.position + beetle_center_offset) > furthest_distance_to_player:
 				furthest_tile_to_player = tile_detection_check
 				furthest_distance_to_player = tile_detection_check.distance_to(player.position)
 				direction_away_from_player = direction
 	
 	var can_move_closer = false
 	var can_move_further = false
-	if position != closest_tile_to_player:
+	if (position + beetle_center_offset) != closest_tile_to_player:
 		can_move_closer = true
-	if position != furthest_tile_to_player:
+	if (position + beetle_center_offset) != furthest_tile_to_player:
 		can_move_further = true
 
 	# Get closer
 	if tile_distance_to_player > 4:
 		if can_move_closer:
 			facing = direction_towards_player
-			await move(closest_tile_to_player)
+			await move(closest_tile_to_player - beetle_center_offset)
 		else:
 			await get_tree().create_timer(0.2).timeout
 	# stay
@@ -190,7 +190,7 @@ func phase_one() -> void:
 	elif tile_distance_to_player < 4:
 		if can_move_further:
 			facing = direction_away_from_player
-			await move(furthest_tile_to_player)
+			await move(furthest_tile_to_player - beetle_center_offset)
 		else:
 			await get_tree().create_timer(0.2).timeout
 	
@@ -203,44 +203,45 @@ func declare_attack() -> void:
 	# iterate across orthogonal directions checking 1 tile away
 	# whichever is closest to player, attack in that direction
 	var direction_towards_player : String
-	var distance_to_player := position.distance_to(player.position)
+	var current_tile := position + beetle_center_offset
+	var distance_to_player := current_tile.distance_to(player.position + beetle_center_offset)
 	var tile_detection_check : Vector2
 	# Check 4 directions
 	for direction in direction_dictionary:
-		tile_detection_check = direction_dictionary[direction] * Globals.grid_size + position
+		tile_detection_check = direction_dictionary[direction] * Globals.grid_size + position + beetle_center_offset
 		# If player is right next to us, attack there of course
 		if tile_detection.player_on_tile(tile_detection_check):
 			declared_attack = true
 			facing = direction
 			direction_towards_player = direction
-			distance_to_player = tile_detection_check.distance_to(player.position)
+			distance_to_player = tile_detection_check.distance_to(player.position + beetle_center_offset)
 			declared_attack_direction = direction_towards_player
-			declared_attack_pos_1 = tile_detection_check
+			declared_attack_pos_1 = tile_detection_check - beetle_center_offset
 			break
 		# If it's a tile we can slash through or if its an enemy
 		elif tile_detection.slashthroughable(tile_detection_check) or tile_detection.enemy_on_tile(tile_detection_check):
 			# confirm that we will be attacking
 			declared_attack = true
 			# If there's a tile closer, we choose that one
-			if tile_detection_check.distance_to(player.position) < distance_to_player:
+			if tile_detection_check.distance_to(player.position + beetle_center_offset) < distance_to_player:
 				facing = direction
 				direction_towards_player = direction
-				distance_to_player = tile_detection_check.distance_to(player.position)
-				declared_attack_pos_1 = tile_detection_check
+				distance_to_player = tile_detection_check.distance_to(player.position + beetle_center_offset)
+				declared_attack_pos_1 = tile_detection_check - beetle_center_offset
 	declared_attack_direction = direction_towards_player
 	
 	# If we can attack 1 tile away, let's see if we attack 2 tiles away, then 3, then 4
 	if declared_attack and declared_attack_direction:
-		tile_detection_check = direction_dictionary[declared_attack_direction] * Globals.grid_size * 2 + position
+		tile_detection_check = direction_dictionary[declared_attack_direction] * Globals.grid_size * 2 + position + beetle_center_offset
 		if tile_detection.player_on_tile(tile_detection_check) or tile_detection.enemy_on_tile(tile_detection_check) or tile_detection.slashthroughable(tile_detection_check):
-			declared_attack_pos_2 = tile_detection_check
-		tile_detection_check = direction_dictionary[declared_attack_direction] * Globals.grid_size * 3 + position
-		if tile_detection.player_on_tile(tile_detection_check) or tile_detection.enemy_on_tile(tile_detection_check) or tile_detection.slashthroughable(tile_detection_check):
-			declared_attack_pos_3 = tile_detection_check
-		tile_detection_check = direction_dictionary[declared_attack_direction] * Globals.grid_size * 4 + position
-		if tile_detection.player_on_tile(tile_detection_check) or tile_detection.enemy_on_tile(tile_detection_check) or tile_detection.slashthroughable(tile_detection_check):
-			declared_attack_pos_4 = tile_detection_check
-		attack_hint()
+			declared_attack_pos_2 = tile_detection_check - beetle_center_offset
+			tile_detection_check = direction_dictionary[declared_attack_direction] * Globals.grid_size * 3 + position + beetle_center_offset
+			if tile_detection.player_on_tile(tile_detection_check) or tile_detection.enemy_on_tile(tile_detection_check) or tile_detection.slashthroughable(tile_detection_check):
+				declared_attack_pos_3 = tile_detection_check - beetle_center_offset
+				tile_detection_check = direction_dictionary[declared_attack_direction] * Globals.grid_size * 4 + position + beetle_center_offset
+				if tile_detection.player_on_tile(tile_detection_check) or tile_detection.enemy_on_tile(tile_detection_check) or tile_detection.slashthroughable(tile_detection_check):
+					declared_attack_pos_4 = tile_detection_check - beetle_center_offset
+	attack_hint()
 	pass
 
 func attack_hint() -> void:
@@ -270,7 +271,7 @@ func attack() -> void:
 	if declared_attack:
 		for attack_spot in [declared_attack_pos_1, declared_attack_pos_2, declared_attack_pos_3, declared_attack_pos_4]:
 			if attack_spot != null:
-				if tile_detection.player_on_tile(attack_spot):
+				if tile_detection.player_on_tile(attack_spot + beetle_center_offset):
 					await player.take_damage(spit_attack_damage)
 	
 	$AttackHint.hide()
@@ -306,7 +307,7 @@ func move(pos: Vector2):
 func check_for_tile_damage() -> void:
 	# If moved onto damaging tile, take damage
 	# They fly now
-	var tile_damage : int = tile_detection.tile_damage_air(position)
+	var tile_damage : int = tile_detection.tile_damage_air(position + beetle_center_offset)
 	if tile_damage > 0:
 		await take_damage(tile_damage)
 
@@ -324,37 +325,37 @@ func where_can_be_pushed(source_direction) -> Variant:
 	var push_spot = null
 	var tile_detection_check : Vector2
 	if source_direction == "Up":
-		tile_detection_check = (Vector2.UP) * Globals.grid_size * 1 + position
+		tile_detection_check = (Vector2.UP) * Globals.grid_size * 1 + position + beetle_center_offset
 		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - beetle_center_offset
 	elif source_direction == "Down":
-		tile_detection_check = (Vector2.DOWN) * Globals.grid_size * 1 + position
+		tile_detection_check = (Vector2.DOWN) * Globals.grid_size * 1 + position + beetle_center_offset
 		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - beetle_center_offset
 	elif source_direction == "Left":
-		tile_detection_check = (Vector2.LEFT) * Globals.grid_size * 1 + position
+		tile_detection_check = (Vector2.LEFT) * Globals.grid_size * 1 + position + beetle_center_offset
 		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - beetle_center_offset
 	elif source_direction == "Right":
-		tile_detection_check = (Vector2.RIGHT) * Globals.grid_size * 1 + position
+		tile_detection_check = (Vector2.RIGHT) * Globals.grid_size * 1 + position + beetle_center_offset
 		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - beetle_center_offset
 	elif source_direction == "Up Left":
-		tile_detection_check = ((Vector2.UP) + (Vector2.LEFT)) * Globals.grid_size * 1 + position
+		tile_detection_check = ((Vector2.UP) + (Vector2.LEFT)) * Globals.grid_size * 1 + position + beetle_center_offset
 		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - beetle_center_offset
 	elif source_direction == "Up Right":
-		tile_detection_check = ((Vector2.UP) + (Vector2.RIGHT)) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = ((Vector2.UP) + (Vector2.RIGHT)) * Globals.grid_size * 1 + position + beetle_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
+			push_spot = tile_detection_check- beetle_center_offset
 	elif source_direction == "Down Left":
-		tile_detection_check = ((Vector2.DOWN) + (Vector2.LEFT)) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = ((Vector2.DOWN) + (Vector2.LEFT)) * Globals.grid_size * 1 + position + beetle_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
+			push_spot = tile_detection_check - beetle_center_offset
 	elif source_direction == "Down Right":
-		tile_detection_check = ((Vector2.DOWN) + (Vector2.RIGHT)) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = ((Vector2.DOWN) + (Vector2.RIGHT)) * Globals.grid_size * 1 + position + beetle_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
+			push_spot = tile_detection_check - beetle_center_offset
 	else:
 		push_error("received impossible direction: " + source_direction)
 	return push_spot
@@ -382,5 +383,4 @@ func take_damage (damage : int):
 		await get_tree().create_timer(0.01).timeout
 		# Should always die in one hit
 		is_alive = false
-		died = true
-		queue_free()
+		hide()

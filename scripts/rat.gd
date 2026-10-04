@@ -10,7 +10,7 @@ extends CharacterBody2D
 @onready var landonable := true
 @onready var moveonable := false
 @onready var is_enemy := true
-@onready var is_alive := true
+@onready var is_alive : bool
 
 
 var ratattack = preload("res://sound/sfx/RatAttack.mp3")  
@@ -110,10 +110,12 @@ func end_turn() -> void:
 	pass
 	
 func _ready() -> void:
+	is_alive = true
 	cur_health = 5
 	$MoveHint.hide()
 	$AttackHint.hide()
 	$AttackHint2.hide()
+	show()
 	sprite.animation = directional_walk_animations[facing]
 
 # Determine if rat should either bump slash, or move then declare attack
@@ -147,7 +149,7 @@ func phase_one() -> void:
 				await get_tree().create_timer(0.05).timeout
 				sprite.animation = directional_walk_animations[eight_direction_to_four_directions[facing]]
 				await player.take_damage(bump_slash_damage)
-				player.pushed_onto(push_target - rat_center_offset)
+				player.pushed_onto(push_target)
 				$AttackHint.hide()
 		else:
 			$AttackHint.global_position = declared_move_pos
@@ -168,21 +170,21 @@ func phase_one() -> void:
 				$AttackHint.hide()
 		if !Globals.GameManager.should_abandon_turn():
 			# Then they damage themselves
-			take_damage(bump_slash_damage)
+			await take_damage(bump_slash_damage)
 	else:
 		# Move towards player
-		var closest_tile_to_player := position
-		var distance_to_player := position.distance_to(player.position)
+		var closest_tile_to_player := position + rat_center_offset
+		var distance_to_player := closest_tile_to_player.distance_to(player.position + rat_center_offset)
 		for direction in direction_dictionary:
-			tile_detection_check = direction_dictionary[direction] * Globals.grid_size + position
+			tile_detection_check = direction_dictionary[direction] * Globals.grid_size + position + rat_center_offset
 			if tile_detection.moveonable(tile_detection_check) and !tile_detection.tile_damage_ground(tile_detection_check):
 				# select the better spot
-				if tile_detection_check.distance_to(player.position) < distance_to_player:
+				if tile_detection_check.distance_to(player.position + rat_center_offset) < distance_to_player:
 					facing = direction
 					closest_tile_to_player = tile_detection_check
-					distance_to_player = tile_detection_check.distance_to(player.position)
-		declared_move_pos = closest_tile_to_player
-		await move(declared_move_pos)
+					distance_to_player = tile_detection_check.distance_to(player.position + + rat_center_offset)
+			declared_move_pos = closest_tile_to_player
+		await move(declared_move_pos - rat_center_offset)
 		if !Globals.GameManager.should_abandon_turn():
 			# Declare attack
 			declare_attack()
@@ -196,15 +198,16 @@ func declare_attack() -> void:
 	var tile_detection_check : Vector2
 	# Check 4 directions
 	for direction in simple_direction_dictionary:
-		tile_detection_check = simple_direction_dictionary[direction] * Globals.grid_size + position
+		tile_detection_check = simple_direction_dictionary[direction] * Globals.grid_size + position + rat_center_offset
 		# If player is right next to us, attack there of course
 		if tile_detection.player_on_tile(tile_detection_check):
 			declared_attack = true
 			facing = direction
+			sprite.animation = directional_walk_animations[eight_direction_to_four_directions[facing]]
 			direction_towards_player = direction
 			distance_to_player = tile_detection_check.distance_to(player.position)
 			declared_attack_direction = direction_towards_player
-			declared_attack_pos_near = tile_detection_check
+			declared_attack_pos_near = tile_detection_check - rat_center_offset
 			break
 		# If it's a tile we can slash through or if its an enemy
 		elif tile_detection.slashthroughable(tile_detection_check) or tile_detection.enemy_on_tile(tile_detection_check):
@@ -213,9 +216,10 @@ func declare_attack() -> void:
 			# If there's a tile closer, we choose that one
 			if tile_detection_check.distance_to(player.position) < distance_to_player:
 				facing = direction
+				sprite.animation = directional_walk_animations[eight_direction_to_four_directions[facing]]
 				direction_towards_player = direction
 				distance_to_player = tile_detection_check.distance_to(player.position)
-				declared_attack_pos_near = tile_detection_check
+				declared_attack_pos_near = tile_detection_check - rat_center_offset
 	declared_attack_direction = direction_towards_player
 	
 	# Discard attack if its trying to attack its own tile, bc that's the closest tile
@@ -224,9 +228,9 @@ func declare_attack() -> void:
 	
 	# If we can attack 1 tile away, let's see if we attack 2 tiles away
 	if declared_attack and declared_attack_direction:
-		tile_detection_check = direction_dictionary[declared_attack_direction] * Globals.grid_size * 2 + position
+		tile_detection_check = direction_dictionary[declared_attack_direction] * Globals.grid_size * 2 + position + rat_center_offset
 		if tile_detection.player_on_tile(tile_detection_check) or tile_detection.enemy_on_tile(tile_detection_check) or tile_detection.slashthroughable(tile_detection_check):
-			declared_attack_pos_far = tile_detection_check
+			declared_attack_pos_far = tile_detection_check - rat_center_offset
 		attack_hint()
 	pass
 
@@ -308,47 +312,51 @@ func where_can_be_pushed(source_direction) -> Variant:
 	var push_spot = null
 	var tile_detection_check : Vector2
 	if source_direction == "Up":
-		tile_detection_check = (Vector2.UP) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = (Vector2.UP) * Globals.grid_size * 1 + position + rat_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check - rat_center_offset):
+			push_spot = tile_detection_check - rat_center_offset
 	elif source_direction == "Down":
-		tile_detection_check = (Vector2.DOWN) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = (Vector2.DOWN) * Globals.grid_size * 1 + position + rat_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check - rat_center_offset):
+			push_spot = tile_detection_check - rat_center_offset
 	elif source_direction == "Left":
-		tile_detection_check = (Vector2.LEFT) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = (Vector2.LEFT) * Globals.grid_size * 1 + position + rat_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check - rat_center_offset):
+			push_spot = tile_detection_check - rat_center_offset
 	elif source_direction == "Right":
-		tile_detection_check = (Vector2.RIGHT) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = (Vector2.RIGHT) * Globals.grid_size * 1 + position + rat_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check - rat_center_offset):
+			push_spot = tile_detection_check - rat_center_offset
 	elif source_direction == "Up Left":
-		tile_detection_check = ((Vector2.UP) + (Vector2.LEFT)) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = ((Vector2.UP) + (Vector2.LEFT)) * Globals.grid_size * 1 + position + rat_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check - rat_center_offset):
+			push_spot = tile_detection_check - rat_center_offset
 	elif source_direction == "Up Right":
-		tile_detection_check = ((Vector2.UP) + (Vector2.RIGHT)) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = ((Vector2.UP) + (Vector2.RIGHT)) * Globals.grid_size * 1 + position + rat_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check - rat_center_offset):
+			push_spot = tile_detection_check - rat_center_offset
 	elif source_direction == "Down Left":
-		tile_detection_check = ((Vector2.DOWN) + (Vector2.LEFT)) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = ((Vector2.DOWN) + (Vector2.LEFT)) * Globals.grid_size * 1 + position + rat_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check - rat_center_offset):
+			push_spot = tile_detection_check - rat_center_offset
 	elif source_direction == "Down Right":
-		tile_detection_check = ((Vector2.DOWN) + (Vector2.RIGHT)) * Globals.grid_size * 1 + position
-		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check):
-			push_spot = tile_detection_check
+		tile_detection_check = ((Vector2.DOWN) + (Vector2.RIGHT)) * Globals.grid_size * 1 + position + rat_center_offset
+		if tile_detection.moveonable(tile_detection_check) and !tile_detection.enemy_on_tile(tile_detection_check - rat_center_offset):
+			push_spot = tile_detection_check - rat_center_offset
 	else:
 		push_error("received impossible direction: " + source_direction)
 	return push_spot
 
 func take_damage (damage : int):
+	if !is_alive:
+		return
+		
 	Globalaudio.play_FX(ratdamage)
 	var attack_shown = $AttackHint.visible
 	var attack2_shown = $AttackHint2.visible
 	sprite.animation = direction_hurt_animation[facing]
 	if damage > 0:
+		sprite.animation = direction_hurt_animation[facing]
 		cur_health -= damage
 		# Take damage animation
 		if attack_shown:
@@ -369,8 +377,7 @@ func take_damage (damage : int):
 	if cur_health <= 0:
 		Globalaudio.play_FX(ratdeath)
 		is_alive = false
-		Debug.say("rat died")
-		queue_free()
+		hide()
 		
 	else:
 		if attack_shown:

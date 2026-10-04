@@ -184,7 +184,6 @@ func main_turn_loop() -> void:
 					else:
 						selected.call()
 						await FinishedAction
-						can_action = false
 					
 				else:
 					turn_over = true
@@ -287,35 +286,35 @@ func where_can_be_pushed(source_direction) -> Variant:
 	if source_direction == "Up":
 		tile_detection_check = (Vector2.UP) * Globals.grid_size * 1 + position + kitty_center_offset
 		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - kitty_center_offset
 	elif source_direction == "Down":
 		tile_detection_check = (Vector2.DOWN) * Globals.grid_size * 1 + position + kitty_center_offset
 		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - kitty_center_offset
 	elif source_direction == "Left":
 		tile_detection_check = (Vector2.LEFT) * Globals.grid_size * 1 + position + kitty_center_offset
 		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - kitty_center_offset
 	elif source_direction == "Right":
 		tile_detection_check = (Vector2.RIGHT) * Globals.grid_size * 1 + position + kitty_center_offset
 		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - kitty_center_offset
 	elif source_direction == "Up Left":
 		tile_detection_check = ((Vector2.UP) + (Vector2.LEFT)) * Globals.grid_size * 1 + position + kitty_center_offset
 		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - kitty_center_offset
 	elif source_direction == "Up Right":
 		tile_detection_check = ((Vector2.UP) + (Vector2.RIGHT)) * Globals.grid_size * 1 + position + kitty_center_offset
 		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - kitty_center_offset
 	elif source_direction == "Down Left":
 		tile_detection_check = ((Vector2.DOWN) + (Vector2.LEFT)) * Globals.grid_size * 1 + position + kitty_center_offset
 		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - kitty_center_offset
 	elif source_direction == "Down Right":
 		tile_detection_check = ((Vector2.DOWN) + (Vector2.RIGHT)) * Globals.grid_size * 1 + position + kitty_center_offset
 		if tile_detection.moveonable(tile_detection_check):
-			push_spot = tile_detection_check
+			push_spot = tile_detection_check - kitty_center_offset
 	else:
 		push_error("received impossible direction: " + source_direction)
 	return push_spot

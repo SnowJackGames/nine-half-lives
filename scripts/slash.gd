@@ -80,6 +80,7 @@ func attempt_slash(valid_dir: Array) -> void:
 	elif Globals.game_mode == 2:
 		Globals.ui.attack_combat_return_hover()
 		var chose_option := false
+		var attacking := false
 		while !chose_option and !Globals.GameManager.should_abandon_turn():
 			# Don't process while paused
 			if Globals.GameManager.paused:
@@ -88,11 +89,14 @@ func attempt_slash(valid_dir: Array) -> void:
 				for dir in player.dir_inputs.keys():
 					# (A) accept
 					if Input.is_action_pressed("ui_accept") and !Input.is_action_pressed("ui_cancel"):
+						attacking = true
 						chose_option = true
 						break
 					# (B) cancel
 					elif Input.is_action_pressed("ui_cancel") and !Input.is_action_pressed("ui_accept"):
+						attacking = false
 						chose_option = true
+						print("canceled")
 						break
 					elif Input.is_action_pressed(dir) and !Input.is_action_pressed("ui_accept")and !Input.is_action_pressed("ui_cancel"):
 						player.facing = player.directional_facing[dir]
@@ -100,8 +104,10 @@ func attempt_slash(valid_dir: Array) -> void:
 						slash_hint(valid_dir, true)
 						break
 			await player.get_tree().create_timer(0.08).timeout
-		if chose_option:
-			await Globals.inputs_clear()
+		await Globals.inputs_clear()
+		print(attacking)
+		if attacking:
+			player.can_action = false
 			enact_slash(valid_dir)
 		else:
 			slash_hint([], false)

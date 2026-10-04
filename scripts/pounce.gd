@@ -74,6 +74,7 @@ func attempt_pounce(valid_dir: Array) -> void:
 			await player.get_tree().create_timer(0.05).timeout
 		if !Globals.GameManager.paused and !Globals.GameManager.should_abandon_turn():
 			enact_pounce()
+			player.can_action = false
 		else:
 			pounce_hint([], false)
 			player.FinishedAction.emit()
@@ -82,6 +83,7 @@ func attempt_pounce(valid_dir: Array) -> void:
 	elif Globals.game_mode == 2:
 		Globals.ui.attack_combat_return_hover()
 		var chose_option := false
+		var attacking := false
 		while !chose_option and !Globals.GameManager.should_abandon_turn():
 			# Don't process while paused
 			if Globals.GameManager.paused:
@@ -91,9 +93,11 @@ func attempt_pounce(valid_dir: Array) -> void:
 					# (A) accept
 					if Input.is_action_pressed("ui_accept") and !Input.is_action_pressed("ui_cancel"):
 						chose_option = true
+						attacking = true
 						break
 					# (B) cancel
 					elif Input.is_action_pressed("ui_cancel") and !Input.is_action_pressed("ui_accept"):
+						attacking = false
 						chose_option = true
 						break
 					elif Input.is_action_pressed(dir) and !Input.is_action_pressed("ui_accept") and !Input.is_action_pressed("ui_cancel"):
@@ -103,8 +107,9 @@ func attempt_pounce(valid_dir: Array) -> void:
 							pounce_hint(valid_dir, true)
 							break
 			await player.get_tree().create_timer(0.08).timeout
-		if chose_option:
-			await Globals.inputs_clear()
+		await Globals.inputs_clear()
+		if attacking:
+			player.can_action = false
 			enact_pounce()
 		else:
 			pounce_hint([], false)
