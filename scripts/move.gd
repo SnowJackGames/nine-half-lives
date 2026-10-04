@@ -20,7 +20,7 @@ func declare_move() -> void:
 			# Make sure we're not facing an illegal direction
 			if !valid_dir.has(player.facing):
 				player.facing = valid_dir[randi_range(0, (valid_dir.size() - 1))]
-				player.sprite.animation = player.directional_walk_animations[player.facing]
+				player.sprite.animation = player.directional_walk_animations[player.directional_facing.find_key(player.facing)]
 			move_hint(valid_dir, true)
 		attempt_move(valid_dir)
 	
