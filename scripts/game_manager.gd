@@ -227,8 +227,6 @@ func load_level(index : int) -> void:
 	current_level = get_node("Levels/" + str(levels_scene.level_order[index]))
 	current_level.visible = true
 	walls = get_node("Levels/" + levels_scene.level_order[index].name + "/Elements/WallTiles")
-	print("enabling:")
-	print(walls)
 	if walls != null:
 		walls.collision_enabled = true
 	current_level.process_mode = Node.PROCESS_MODE_INHERIT

@@ -43,7 +43,6 @@ func _ready() -> void:
 
 
 func disable_all() -> void:
-	print("disabling everything MEOWWWW")
 	for level in level_order:
 		level.visible = false
 		level.process_mode = PROCESS_MODE_DISABLED
@@ -51,11 +50,9 @@ func disable_all() -> void:
 		#Disable Wall collision
 		var collisionDisable = get_node(str(level))
 		var collisionDisable2 = str(collisionDisable.name)
-		print(collisionDisable2 + "/Elements/WallTiles")
 		
 		
 		var collisionDisable3 = get_node(collisionDisable2 + "/Elements/WallTiles")
-		print(collisionDisable3)
 		
 		if collisionDisable3 != null:
 			collisionDisable3.collision_enabled = false
