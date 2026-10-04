@@ -51,7 +51,7 @@ func tile_damage_air(pos) -> int:
 	
 	for result in results:
 		if "tile_damage_air" in result.collider:
-			dmg += result.collider.d
+			dmg += result.collider.tile_damage_air
 	
 	return dmg
 

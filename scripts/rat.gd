@@ -187,7 +187,7 @@ func phase_one() -> void:
 			if tile_detection.moveonable(tile_detection_check) and !tile_detection.tile_damage_ground(tile_detection_check):
 				# select the better spot
 				if tile_detection_check.distance_to(player.position + rat_center_offset) < distance_to_player:
-					facing = direction
+					facing = eight_direction_to_four_directions[direction]
 					closest_tile_to_player = tile_detection_check
 					distance_to_player = tile_detection_check.distance_to(player.position + + rat_center_offset)
 			declared_move_pos = closest_tile_to_player

@@ -187,7 +187,7 @@ func phase_one() -> void:
 	# Get closer
 	if tile_distance_to_player > 4:
 		if can_move_closer:
-			facing = direction_towards_player
+			facing = eight_direction_to_four_directions[direction_towards_player]
 			await move(closest_tile_to_player - beetle_center_offset)
 		else:
 			await get_tree().create_timer(0.2).timeout
@@ -197,7 +197,7 @@ func phase_one() -> void:
 	# move away
 	elif tile_distance_to_player < 4:
 		if can_move_further:
-			facing = direction_away_from_player
+			facing = eight_direction_to_four_directions[direction_away_from_player]
 			await move(furthest_tile_to_player - beetle_center_offset)
 		else:
 			await get_tree().create_timer(0.2).timeout
@@ -220,7 +220,7 @@ func declare_attack() -> void:
 		# If player is right next to us, attack there of course
 		if tile_detection.player_on_tile(tile_detection_check):
 			declared_attack = true
-			facing = direction
+			facing = eight_direction_to_four_directions[direction]
 			direction_towards_player = direction
 			distance_to_player = tile_detection_check.distance_to(player.position + beetle_center_offset)
 			declared_attack_direction = direction_towards_player
@@ -232,7 +232,7 @@ func declare_attack() -> void:
 			declared_attack = true
 			# If there's a tile closer, we choose that one
 			if tile_detection_check.distance_to(player.position + beetle_center_offset) < distance_to_player:
-				facing = direction
+				facing = eight_direction_to_four_directions[direction]
 				direction_towards_player = direction
 				distance_to_player = tile_detection_check.distance_to(player.position + beetle_center_offset)
 				declared_attack_pos_1 = tile_detection_check - beetle_center_offset
