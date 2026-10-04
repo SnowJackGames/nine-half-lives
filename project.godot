@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Keep Your Color Kitty"
+config/name="Nine Half-Lives"
 run/main_scene="uid://bvivttt157co2"
 config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/show_image=false

@@ -20,6 +20,7 @@ var on_level_exit := false
 var can_move := false
 var can_action := false
 var just_took_damage := false
+var win_flag := false
 
 var catdamage_fx = preload("res://sound/sfx/CatDamage.mp3")    
 var menu_fx1 = preload("res://sound/sfx/MenuMove.mp3")	
@@ -143,11 +144,19 @@ func reset_status() -> void:
 
 func main_turn_loop() -> void:
 	while !turn_over:
+		# exit if we're reloading
+		if Globals.GameManager.reloading:
+			turn_over = true
+		
 		# Immediately exit if we're on the stairs
 		if tile_detection.objectnamesatspot(position + kitty_center_offset).has("Stairs"):
 			on_level_exit = true
 			Debug.say("on the exit")
 			turn_over = true
+		if tile_detection.objectnamesatspot(position + kitty_center_offset).has("Rod"):
+			Debug.say("You win !")
+			turn_over = true
+			win_flag = true
 		
 		# Otherwise, handle turn normally
 		else:

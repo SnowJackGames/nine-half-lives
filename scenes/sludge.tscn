@@ -64,7 +64,7 @@ tile_set = SubResource("TileSet_74qev")
 
 [node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1178943595]
 stream = ExtResource("9_ppeti")
-volume_db = 4.35
+volume_db = 0.84
 autoplay = true
 max_distance = 110.0
 attenuation = 1.7411014

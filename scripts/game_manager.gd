@@ -9,11 +9,13 @@ extends Node2D
 @onready var ai_array : Array[CharacterBody2D] = []
 
 @onready var game_over_player = $GameOverSequence
+@onready var intro_player = $StartSequence
 @onready var pause_menu = $PauseMenu/CanvasLayer
 @onready var pause_menu_node = $PauseMenu
 @onready var paused = false
 @onready var turn_running = false
 
+var intro_over = false
 signal FinishedTurnCycle
 
 var diedOnFloor = false
@@ -120,13 +122,10 @@ func next_turn() -> void:
 	if !should_abandon_turn():
 		# Unlock stairs
 		await calc_ai_array()
-		if !ai_array:
+		if !ai_array and current_level.name != "Level18":
 			if current_level.get_node("Elements/Stairs"):
 				current_level.get_node("Elements/Stairs").unlock()
-				
-					
-				
-
+		
 		if player_character.on_level_exit:
 			if current_level.name == "Exploration0":
 				Globalaudio.play_FX(SFXcombatmode, -12.0, 0.56)
@@ -138,7 +137,6 @@ func next_turn() -> void:
 			await get_tree().create_timer(0.75).timeout
 			await increment_active_level()
 			diedOnFloor = false
-			
 	else:
 		Debug.say("abandoning turn\n--------")
 		await get_tree().create_timer(0.01).timeout
@@ -152,7 +150,9 @@ func next_turn() -> void:
 	#endregion
 	
 	#region Next Turn Handling
-	if !should_abandon_turn():
+	if player_character.win_flag:
+		Globals.ui.win()
+	elif !should_abandon_turn():
 		next_turn()
 	#endregion
 
@@ -199,6 +199,7 @@ func reload_level(from_game_over := false):
 	# Wait for current turn to be cleaned up
 	while turn_running:
 		await get_tree().create_timer(0.1).timeout
+		print(turn_running)
 		
 	# Now, reload things
 	Debug.say("resetting")
@@ -208,6 +209,7 @@ func reload_level(from_game_over := false):
 		game_over_player.play_game_over()
 		await game_over_player.animation_finished
 	else:
+		game_over_player.clean_up()
 		game_over_player.play_fade_out()
 		await game_over_player.animation_finished
 		
@@ -233,12 +235,14 @@ func pause_game():
 	pause_menu.show()
 	
 func unpause_game():
+	print("before inputs clear")
 	await Globals.inputs_clear()
 	paused = false
 	unpause($Levels)
 	unpause($Player)
 	pause_menu.hide()
 	pause(pause_menu_node)
+	print("finished unpause from within")
 
 func increment_active_level() -> void:
 	current_level_index += 1
@@ -278,14 +282,15 @@ func load_level(index : int) -> void:
 	if !reloading:
 		#Globalaudio.play_FX(SFXlevelchange,-5.0)
 		if current_level.name == "Tutorial1":
-			print(current_playback_time())
+			#print(current_playback_time())
 			Globalaudio.playVolume(0.35)
 			Globalaudio.fadeInTime(8.0)
 			Globalaudio.play_music_level_random_start(fell,-10.0)
 			Globalambienceplayer.playVolume(0.75)
 			Globalambienceplayer.play_music_level_random_start(ambience1)
 		if current_level.name == "Exploration0":
-			print(current_playback_time())
+			pass
+			#print(current_playback_time())
 		if current_level.name == "Level1":
 			
 			Globalaudio.fadeInTime(0.5)
@@ -310,13 +315,13 @@ func load_level(index : int) -> void:
 			Globalaudio.play_FX(SFXexplorationmode,-12.0)
 			Globalaudio.playVolume(0.35)
 			Globalaudio.fadeInTime(6.0)
-			Globalaudio.play_music_level_random_start(spurr,-2.0)
+			Globalcombatmusic.play_music_level(spurr,3.0)
 			Globalaudio.fadeInTime(0.1)
 			Globalambienceplayer.playVolume(0.75)
 			Globalambienceplayer.play_music_level_random_start(ambience1)
 			
 		if current_level.name == "Level6":
-			Globalaudio.play_music_level(teeter, 5.0)
+			Globalaudio.play_music_level(teeter, 7.0)
 		if current_level.name == "Exploration2":
 			Globalaudio.play_music_level(opening, 5.0)
 		if current_level.name == "Level8":
@@ -407,15 +412,30 @@ func _ready() -> void:
 	reloading = false
 	pause_menu_node.game_resume.connect(unpause_game)
 	pause_menu_node.reload_room.connect(reload_level)
+	pause_menu_node.quit_game.connect(quit)
 	player_character.damaged.connect(_on_player_damaged)
-	pause_menu.hide()
 	pause(pause_menu_node)
+	pause_menu.hide()
+	hide()
+	await intro()
 	show()
 	levels_scene.show()
 	player_character.show()
 	await load_level(current_level_index)
+	intro_player.clean_up()
 	next_turn()
+	intro_over = true
 
+func intro() -> void:
+	intro_player.run_start_sequence()
+	await intro_player.animation_finished
+	intro_player.start_menu()
+	await Globals.inputs_clear()
+	await Globals.ui_accept_pressed
+	await Globals.inputs_clear()
+	
+func quit() -> void:
+	get_tree().quit()
 	
 func _on_player_damaged(current_health: int, max_health: int) -> void:
 	Debug.say("Health: %s / %s" % [current_health, max_health])
@@ -472,7 +492,7 @@ func _on_player_damaged(current_health: int, max_health: int) -> void:
 			if current_level.name == "Level1" || current_level.name == "Level2" || current_level.name == "Level3" || current_level.name == "Level4":
 				Globalaudio.stop()
 				Globalcombatmusic.stop()
-				Globalcombatmusic.play_music_level(emerald)
+				Globalcombatmusic.play_music_level(steppin3)
 			if current_level.name == "Level17":
 				Globalaudio.stop()
 				Globalcombatmusic.stop()
@@ -480,6 +500,6 @@ func _on_player_damaged(current_health: int, max_health: int) -> void:
 
 
 func _process(_delta: float) -> void:
-	if Input.is_action_just_pressed("ui_close_dialog") and !Globals.GameManager.should_abandon_turn():
+	if Input.is_action_just_pressed("ui_close_dialog") and !Globals.GameManager.should_abandon_turn() and intro_over:
 		if paused == false:
 			pause_game()

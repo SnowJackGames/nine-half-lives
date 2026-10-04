@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://cak0hse4xwae3" path="res://scenes/beetle.tscn" id="9_ibiju"]
 [ext_resource type="Texture2D" uid="uid://b8wjppxjankeh" path="res://art/tilesets/Tileset Decorative Walls 3.png" id="10_4knel"]
 [ext_resource type="PackedScene" uid="uid://gesqdrgovq4u" path="res://scenes/radiotowerstrong.tscn" id="11_n10dd"]
+[ext_resource type="PackedScene" uid="uid://c041fesrvhwb8" path="res://scenes/rod2.tscn" id="17_4knel"]
 
 [sub_resource type="TileMapPattern" id="TileMapPattern_bxgxo"]
 tile_data = PackedInt32Array(0, 0, 0, 65536, 0, 1, 131072, 0, 2, 1, 65536, 0, 65537, 65536, 1, 131073, 65536, 2, 2, 131072, 0, 65538, 131072, 1, 131074, 131072, 2)
@@ -3013,6 +3014,9 @@ physics_quadrant_size = 1
 [node name="Level18" parent="." unique_id=1181135597 instance=ExtResource("2_5ekxl")]
 set_player_start_position = Vector2(240, 368)
 
+[node name="Rod" parent="Level18" unique_id=1740600721 instance=ExtResource("17_4knel")]
+position = Vector2(240, -368)
+
 [node name="radiosignal" parent="Level18" unique_id=989298116 instance=ExtResource("3_3vv5q")]
 position = Vector2(192, 352)
 
@@ -3042,9 +3046,6 @@ position_smoothing_enabled = true
 position_smoothing_speed = 2.0
 
 [node name="Elements" type="Node2D" parent="Level18" unique_id=911822221]
-
-[node name="Stairs" parent="Level18/Elements" unique_id=474396161 instance=ExtResource("3_r44b6")]
-position = Vector2(240, -368)
 
 [node name="DecorativeWallTiles" type="TileMapLayer" parent="Level18/Elements" unique_id=1856863930]
 z_index = 2

@@ -5,7 +5,7 @@
 [ext_resource type="AudioStream" uid="uid://bed7whejxvaj7" path="res://sound/music/9-29-2026 Receiving Signals.mp3" id="3_ecnbb"]
 [ext_resource type="AudioStream" uid="uid://b4f75ralnd72m" path="res://sound/music/9-29-2026 Sending Signals.mp3" id="4_pqsq5"]
 [ext_resource type="AudioStream" uid="uid://ckrfy48rfskj3" path="res://sound/music/9-29-26 Underriser.mp3" id="5_dba6v"]
-[ext_resource type="Script" uid="uid://bytnhwcfqscvv" path="res://scenes/globalaudiointeractive.gd" id="6_qsvfq"]
+[ext_resource type="Script" uid="uid://bytnhwcfqscvv" path="res://scripts/globalaudiointeractive.gd" id="6_qsvfq"]
 
 [sub_resource type="AudioStreamInteractive" id="AudioStreamInteractive_mrigs"]
 clip_count = 5

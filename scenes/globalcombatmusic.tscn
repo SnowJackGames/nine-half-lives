@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://0pfydnxroisd"]
 
-[ext_resource type="Script" uid="uid://b3tn6ehp0xm80" path="res://scenes/globalcombatmusic.gd" id="1_a2bmx"]
+[ext_resource type="Script" uid="uid://b3tn6ehp0xm80" path="res://scripts/globalcombatmusic.gd" id="1_a2bmx"]
 
 [sub_resource type="AudioStream" id="AudioStream_viikd"]
 

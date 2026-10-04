@@ -1,74 +1,21 @@
 [gd_scene format=3 uid="uid://h5cah04osrbd"]
 
-[ext_resource type="Script" uid="uid://bgwwcsh7gwrva" path="res://bird sequences/start_sequence.gd" id="1_1nnug"]
-[ext_resource type="Script" uid="uid://d00a7eoqqsw4f" path="res://bird sequences/intro.gd" id="2_1nnug"]
-[ext_resource type="Texture2D" uid="uid://fimwb076xj66" path="res://bird sequences/sequence_assets/controls.png" id="3_1nnug"]
-[ext_resource type="Texture2D" uid="uid://bc1ncfaohomvh" path="res://bird sequences/sequence_assets/snowjack-splash.png" id="4_n6hct"]
-[ext_resource type="Texture2D" uid="uid://bv5u2l8p8dnny" path="res://bird sequences/sequence_assets/gbjam14-splash.png" id="5_3s0v3"]
-[ext_resource type="Texture2D" uid="uid://cexunyltiyvb3" path="res://bird sequences/sequence_assets/half-black-screen.png" id="6_je1xk"]
-[ext_resource type="Texture2D" uid="uid://c730btcse8kre" path="res://bird sequences/sequence_assets/black-screen.png" id="7_0qai1"]
-[ext_resource type="Script" uid="uid://bdlbglqct6781" path="res://bird sequences/title_screen.gd" id="8_wf8yn"]
-[ext_resource type="Texture2D" uid="uid://csp1jpo3cl24d" path="res://bird sequences/sequence_assets/final-title-New.png" id="9_mk77i"]
-[ext_resource type="Texture2D" uid="uid://c3lurysarwgxy" path="res://bird sequences/sequence_assets/final-title-Load.png" id="10_rs3uk"]
-[ext_resource type="Texture2D" uid="uid://jxst3iitnq50" path="res://bird sequences/sequence_assets/final-title-1.png" id="11_wf8yn"]
+[ext_resource type="Script" uid="uid://bgwwcsh7gwrva" path="res://scripts/start_sequence.gd" id="1_1nnug"]
+[ext_resource type="Texture2D" uid="uid://bc1ncfaohomvh" path="res://art/sequence_assets/snowjack-splash.png" id="4_n6hct"]
+[ext_resource type="Texture2D" uid="uid://cexunyltiyvb3" path="res://art/sequence_assets/half-black-screen.png" id="6_je1xk"]
+[ext_resource type="Texture2D" uid="uid://dwadqrta5axjh" path="res://art/tilesets/final-title-1.png" id="6_sooq6"]
+[ext_resource type="Texture2D" uid="uid://c730btcse8kre" path="res://art/sequence_assets/black-screen.png" id="7_0qai1"]
+[ext_resource type="Texture2D" uid="uid://jxst3iitnq50" path="res://art/sequence_assets/final-title-1.png" id="11_wf8yn"]
 
 [sub_resource type="Animation" id="Animation_lgwnu"]
 length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("intro/black_screen:visible")
+tracks/0/path = NodePath("main_menu:visible")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [true]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("intro/half_black_screen:visible")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [true]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("intro/gbjam14:visible")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [true]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("intro/snowjackgames:visible")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [true]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("intro/controls:visible")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
@@ -77,66 +24,54 @@ tracks/4/keys = {
 
 [sub_resource type="Animation" id="Animation_flqon"]
 resource_name = "opening_sequence"
-length = 6.6
+length = 4.5
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("intro/black_screen:visible")
+tracks/0/path = NodePath("black_screen:visible")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.8, 2.5, 3.5, 5.2, 6.3),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"times": PackedFloat32Array(0, 0.89999974, 2.833333, 4.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 1,
-"values": [true, false, true, false, true, false]
+"values": [true, false, true, false]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("intro/half_black_screen:visible")
+tracks/1/path = NodePath("half_black_screen:visible")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 1, 2.3, 3.7, 5, 6.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"times": PackedFloat32Array(0, 1.2333332, 2.5333333, 4.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
 "update": 1,
-"values": [true, false, true, false, true, false]
+"values": [true, false, true, false]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("intro/gbjam14:visible")
+tracks/2/path = NodePath("main_menu:visible")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 2.5),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [true, false]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("intro/snowjackgames:visible")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 5.2),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [true, false]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("intro/controls:visible")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
 "values": [true]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("snowjackgames:visible")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 2.833333),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [true, false]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_rcqid"]
@@ -155,57 +90,34 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_1nnug")
 
-[node name="intro" type="CanvasLayer" parent="." unique_id=1273199580]
-script = ExtResource("2_1nnug")
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1273199580]
 
-[node name="controls" type="TextureRect" parent="intro" unique_id=1555624461]
-offset_right = 166.0
+[node name="main_menu" type="TextureRect" parent="CanvasLayer" unique_id=491904261]
+offset_right = 160.0
 offset_bottom = 144.0
-texture = ExtResource("3_1nnug")
+texture = ExtResource("6_sooq6")
 
-[node name="snowjackgames" type="TextureRect" parent="intro" unique_id=261957451]
+[node name="snowjackgames" type="TextureRect" parent="CanvasLayer" unique_id=261957451]
 offset_right = 160.0
 offset_bottom = 144.0
 texture = ExtResource("4_n6hct")
 
-[node name="gbjam14" type="TextureRect" parent="intro" unique_id=214440328]
-offset_right = 160.0
-offset_bottom = 144.0
-texture = ExtResource("5_3s0v3")
-
-[node name="half_black_screen" type="TextureRect" parent="intro" unique_id=1679431374]
+[node name="half_black_screen" type="TextureRect" parent="CanvasLayer" unique_id=1679431374]
 offset_right = 160.0
 offset_bottom = 144.0
 texture = ExtResource("6_je1xk")
 
-[node name="black_screen" type="TextureRect" parent="intro" unique_id=1084936884]
+[node name="black_screen" type="TextureRect" parent="CanvasLayer" unique_id=1084936884]
 offset_right = 166.0
 offset_bottom = 144.0
 texture = ExtResource("7_0qai1")
 
-[node name="intro_animation" type="AnimationPlayer" parent="intro" unique_id=1285402130]
-root_node = NodePath("../..")
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CanvasLayer" unique_id=1285402130]
 libraries/ = SubResource("AnimationLibrary_rcqid")
 
 [node name="title_screen" type="CanvasLayer" parent="." unique_id=99014014]
-script = ExtResource("8_wf8yn")
 
-[node name="mm2_new" type="TextureRect" parent="title_screen" unique_id=488002707]
-offset_right = 40.0
-offset_bottom = 40.0
-texture = ExtResource("9_mk77i")
-
-[node name="mm2_load" type="TextureRect" parent="title_screen" unique_id=1056184001]
-offset_right = 160.0
-offset_bottom = 144.0
-texture = ExtResource("10_rs3uk")
-
-[node name="main_menu_1" type="TextureRect" parent="title_screen" unique_id=1684516210]
+[node name="main_menu" type="TextureRect" parent="title_screen" unique_id=1684516210]
 offset_right = 160.0
 offset_bottom = 144.0
 texture = ExtResource("11_wf8yn")
-
-[node name="controls" type="TextureRect" parent="title_screen" unique_id=823174993]
-offset_right = 166.0
-offset_bottom = 144.0
-texture = ExtResource("3_1nnug")

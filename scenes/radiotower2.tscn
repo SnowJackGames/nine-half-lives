@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://3r6hl73imtvl"]
 
-[ext_resource type="Script" uid="uid://du5jb6310hr3y" path="res://scenes/radiotower_2.gd" id="1_0kxlb"]
+[ext_resource type="Script" uid="uid://du5jb6310hr3y" path="res://scripts/radiotower_2.gd" id="1_0kxlb"]
 [ext_resource type="AudioStream" uid="uid://bqc42r25tactn" path="res://sound/music/signals1.mp3" id="9_smmej"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nish5"]

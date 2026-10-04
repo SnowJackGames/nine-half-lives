@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://c041fesrvhwb8"]
+
+[ext_resource type="Script" uid="uid://bc0bfhru3jndm" path="res://scripts/rod_2.gd" id="1_e7dgq"]
+[ext_resource type="Texture2D" uid="uid://cjx54ijyuk45x" path="res://art/floor/plain-rod.png" id="2_tjhhk"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nish5"]
+size = Vector2(16, 16)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e7dgq"]
+texture = ExtResource("2_tjhhk")
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_coc74"]
+sources/0 = SubResource("TileSetAtlasSource_e7dgq")
+
+[node name="Rod" type="StaticBody2D" unique_id=369884562]
+script = ExtResource("1_e7dgq")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=68033917]
+position = Vector2(8, 8)
+shape = SubResource("RectangleShape2D_nish5")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1209576093]
+tile_map_data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+tile_set = SubResource("TileSet_coc74")

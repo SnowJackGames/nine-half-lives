@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cdr8jgfxou2vs" path="res://scenes/player.tscn" id="1_req00"]
 [ext_resource type="PackedScene" uid="uid://onnss6t256u7" path="res://scenes/ui.tscn" id="3_60lig"]
 [ext_resource type="PackedScene" uid="uid://cafb6r831avqn" path="res://scenes/game_over_sequence.tscn" id="5_74qev"]
+[ext_resource type="PackedScene" uid="uid://h5cah04osrbd" path="res://scenes/start_sequence.tscn" id="5_a8rmw"]
 [ext_resource type="PackedScene" uid="uid://u08yy4mkm2w8" path="res://scenes/pause_menu.tscn" id="6_a8rmw"]
 [ext_resource type="PackedScene" uid="uid://cb2kdlv5tdnkm" path="res://scenes/levels.tscn" id="6_ab5sx"]
 
@@ -23,6 +24,8 @@ offset_right = 320.0
 offset_bottom = -208.0
 
 [node name="Levels" parent="." unique_id=272764069 instance=ExtResource("6_ab5sx")]
+
+[node name="StartSequence" parent="." unique_id=2089239307 instance=ExtResource("5_a8rmw")]
 
 [node name="GameOverSequence" parent="." unique_id=2100362117 instance=ExtResource("5_74qev")]
 

@@ -71,6 +71,7 @@ func _process(_delta:float):
 			menu_index = 4
 			$CanvasLayer/controls.show()
 		elif menu_index == 2:
+			print("emitting reload")
 			reload_room.emit()
 		elif menu_index == 3:
 			quit_game.emit()

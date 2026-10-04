@@ -78,3 +78,10 @@ func health(h := 15) -> void:
 		health_ones_atlas.region = Rect2(0,32,16,16)
 	elif ones_place == 9:
 		health_ones_atlas.region = Rect2(16,32,16,16)
+
+
+func win() -> void:
+	hide_all()
+	show()
+	$CanvasLayer.show()
+	$CanvasLayer/WinScreen.show()

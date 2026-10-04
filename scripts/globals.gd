@@ -17,12 +17,19 @@ var game_mode := 0
 
 @onready var GameManager : Node2D
 
+signal ui_accept_pressed
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_accept"):
+		ui_accept_pressed.emit()
+
 
 ## When given an [Array] of [String]s containing inputs [br](ex. [enum "ui_accept"], [enum "ui_cancel"] etc.),
 ## [br]waits for those inputs to be [i]not[/i] being pressed down [br](i.e. being "clear") before continuing.
 ## [br][br]If not given a particular list, defaults to: [br][[br] [enum "ui_accept"][br] [enum "ui_cancel"]
 ## [br] [enum "ui_up"][br] [enum "ui_down"][br] [enum "ui_left"][br] [enum "ui_right"][br]]
 func inputs_clear(inputs : Array[String] = []) -> void:
+	await get_tree().process_frame
 	for input in inputs:
 		if input is not String:
 			push_error("item in Array given to await_inputs_clear() was not a string")
