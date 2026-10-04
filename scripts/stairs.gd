@@ -9,6 +9,8 @@ extends StaticBody2D
 @onready var slashthroughable := false
 @onready var level_exit := true
 
+
+
 # We want to be able to customize every tile instance for specific textures / rotations
 @export_group("Visuals")
 @export_range(0, 1) var atlas_source_id : int = 0:

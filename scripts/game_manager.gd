@@ -16,10 +16,20 @@ extends Node2D
 
 signal FinishedTurnCycle
 
+var diedOnFloor = false
+var diedOnFloorTwice = false 
+var diedOnFloorThrice = false
+
 var bus_name: String
 var bus_index: int
 
 const ambience1 = preload("res://sound/ambience/Ambience 1.mp3")
+
+const SFXstairs = preload("res://sound/sfx/Stairs.mp3")
+const SFXcombatmode = preload("res://sound/sfx/CombatMode.mp3")
+const SFXexplorationmode = preload("res://sound/sfx/ExploMode.mp3")
+const SFXlevelchange = preload("res://sound/sfx/Levelchange2.mp3")
+const SFXmenuclick = preload("res://sound/sfx/MenuClick.mp3")
 
 const steppin = preload("res://sound/music/Side Steppin'.mp3")
 const blurr = preload("res://sound/music/Blurr.mp3")
@@ -29,6 +39,12 @@ const opening = preload("res://sound/music/Opening.mp3")
 const spurr = preload("res://sound/music/Spurr.mp3")
 const teeter = preload("res://sound/music/Teeter.mp3")
 
+const steppin1 = preload("res://sound/music/2026 - 10 - 3 Stepping level 1.mp3")
+const steppin2 = preload("res://sound/music/2026 - 10 - 3 Stepping level 2.mp3")
+const steppin3 = preload("res://sound/music/2026 - 10 - 3 Stepping level 3.mp3")
+const openemerald = preload("res://sound/music/2026 - 10 - 3 - Open Emerald.mp3")
+
+	
 const deeperred = preload("res://sound/music/9 - 29 - 26 Deeper Red.mp3")
 const fell = preload("res://sound/music/9-29-26 Fell.mp3")
 const underriser = preload("res://sound/music/9-29-26 Underriser.mp3")
@@ -39,6 +55,10 @@ var reloading : bool
 ## Main loop for the turn cycle, containing player and enemy phases.
 ## [br]Attempts to abandon running any phases or moving automatically to next turn
 ## [br] if player health <= 0, or if we sent a signal to restart the level.
+
+func current_playback_time():
+	return Globalaudio.get_playback_position()
+	
 func next_turn() -> void:
 	turn_running = true
 	Debug.say("starting turn")
@@ -103,9 +123,22 @@ func next_turn() -> void:
 		if !ai_array:
 			if current_level.get_node("Elements/Stairs"):
 				current_level.get_node("Elements/Stairs").unlock()
+				
+					
+				
 
 		if player_character.on_level_exit:
+			if current_level.name == "Exploration0":
+				Globalaudio.play_FX(SFXcombatmode, -12.0, 0.56)
+			if current_level.name == "Level4":
+				Globalcombatmusic.fadeInTime(1)
+				Globalcombatmusic.toggle()
+				
+			Globalaudio.play_FX(SFXstairs)
+			await get_tree().create_timer(0.75).timeout
 			await increment_active_level()
+			diedOnFloor = false
+			
 	else:
 		Debug.say("abandoning turn\n--------")
 		await get_tree().create_timer(0.01).timeout
@@ -123,7 +156,7 @@ func next_turn() -> void:
 		next_turn()
 	#endregion
 
-## Initial movements and bump-slash
+## Initial movements and bump-slashif current_level.name == "Level1":
 func enemy_phase_one() -> void:
 	for ai in ai_array:
 		await Globals.not_paused()
@@ -192,6 +225,7 @@ func reload_level(from_game_over := false):
 
 func pause_game():
 	await get_tree().create_timer(.05).timeout
+	Globalaudio.play_FX(SFXmenuclick,-3.7)
 	paused = true
 	pause($Levels)
 	pause($Player)
@@ -242,13 +276,18 @@ func load_level(index : int) -> void:
 	
 	# Audio
 	if !reloading:
+		#Globalaudio.play_FX(SFXlevelchange,-5.0)
 		if current_level.name == "Tutorial1":
+			print(current_playback_time())
 			Globalaudio.playVolume(0.35)
 			Globalaudio.fadeInTime(8.0)
 			Globalaudio.play_music_level_random_start(fell,-10.0)
 			Globalambienceplayer.playVolume(0.75)
 			Globalambienceplayer.play_music_level_random_start(ambience1)
+		if current_level.name == "Exploration0":
+			print(current_playback_time())
 		if current_level.name == "Level1":
+			
 			Globalaudio.fadeInTime(0.5)
 			Globalambienceplayer.fadeInTime(15.0)
 			Globalaudio.toggle()
@@ -256,22 +295,32 @@ func load_level(index : int) -> void:
 			#Globalcombatmusic.playVolume(0.7)
 			#Globalcombatmusic.fadeInTime(4)
 			Globalcombatmusic.fadeInTime(0.0)
-			Globalcombatmusic.play_music_level(steppin)
+			Globalcombatmusic.play_music_level(receivingsignals,-7.0)
+			Globalcombatmusic.fadeInTime(0.2)
+			
+			
+			
+		if current_level.name == "Level3":
+			Globalcombatmusic.fadeInTime(0.2)
+			Globalaudio.play_music_level(underriser,-5.0)
+		
+			
 			
 		if current_level.name == "Level5":
+			Globalaudio.play_FX(SFXexplorationmode,-12.0)
 			Globalaudio.playVolume(0.35)
-			Globalaudio.fadeInTime(8.0)
-			Globalaudio.play_music_level_random_start(spurr,-10.0)
+			Globalaudio.fadeInTime(6.0)
+			Globalaudio.play_music_level_random_start(spurr,-2.0)
 			Globalaudio.fadeInTime(0.1)
 			Globalambienceplayer.playVolume(0.75)
 			Globalambienceplayer.play_music_level_random_start(ambience1)
 			
 		if current_level.name == "Level6":
-			Globalaudio.play_music_level(teeter)
+			Globalaudio.play_music_level(teeter, 5.0)
 		if current_level.name == "Exploration2":
-			Globalaudio.play_music_level(opening)
+			Globalaudio.play_music_level(opening, 5.0)
 		if current_level.name == "Level8":
-			Globalaudio.play_music_level(teeter)
+			Globalaudio.play_music_level(openemerald, 5.0)
 		if current_level.name == "Exploration3":
 			Globalaudio.play_music_level(magenta)
 		if current_level.name == "Level12":
@@ -280,6 +329,10 @@ func load_level(index : int) -> void:
 			Globalaudio.play_music_level(blurr)
 		if current_level.name == "Level15":
 			Globalaudio.play_music_level(emerald)
+		if current_level.name == "Level18":
+			Globalaudio.play_music_level(sendingsignals)
+		#if current_level.name == "Level17":
+			#Globalaudio.play_music_level(openemerald)
 	
 	await get_tree().create_timer(0.1).timeout
 
@@ -369,6 +422,61 @@ func _on_player_damaged(current_health: int, max_health: int) -> void:
 	
 	if Globals.GameManager.should_abandon_turn():
 		reload_level(true)
+		if diedOnFloorTwice == true:
+			diedOnFloorThrice = true
+		if diedOnFloor == true:
+			diedOnFloorTwice = true
+		diedOnFloor = true
+		
+		#Died
+		if diedOnFloorTwice == false:
+			if current_level.name == "Level1" || current_level.name == "Level2" || current_level.name == "Level3" || current_level.name == "Level4":
+				Globalaudio.stop()
+				Globalcombatmusic.stop()
+				Globalcombatmusic.play_music_level(steppin1)
+			if current_level.name == "Level10" || current_level.name == "Level11":
+				Globalaudio.stop()
+				Globalcombatmusic.stop()
+				Globalcombatmusic.play_music_level(steppin2)
+			if current_level.name == "Level15" || current_level.name == "Level16":	
+				Globalaudio.stop()
+				Globalcombatmusic.stop()
+				Globalcombatmusic.play_music_level(steppin3)
+			if current_level.name == "Level17":
+				Globalaudio.stop()
+				Globalcombatmusic.stop()
+				Globalcombatmusic.play_music_level(openemerald)
+				
+				
+		#Died Twice
+		if diedOnFloorTwice == true && diedOnFloorThrice == false:
+			if current_level.name == "Level1" || current_level.name == "Level2" || current_level.name == "Level3" || current_level.name == "Level4":
+				Globalaudio.stop()
+				Globalcombatmusic.stop()
+				Globalcombatmusic.play_music_level(steppin2)
+			if current_level.name == "Level10" || current_level.name == "Level11":
+				Globalaudio.stop()
+				Globalcombatmusic.stop()
+				Globalcombatmusic.play_music_level(steppin3)
+			if current_level.name == "Level14":
+				Globalaudio.stop()
+				Globalcombatmusic.stop()	
+				Globalcombatmusic.play_music_level(openemerald)
+			if current_level.name == "Level17":
+				Globalaudio.stop()
+				Globalcombatmusic.stop()
+				Globalcombatmusic.play_music_level(steppin3)
+				
+		#died three times
+		if diedOnFloorThrice == true:
+			if current_level.name == "Level1" || current_level.name == "Level2" || current_level.name == "Level3" || current_level.name == "Level4":
+				Globalaudio.stop()
+				Globalcombatmusic.stop()
+				Globalcombatmusic.play_music_level(emerald)
+			if current_level.name == "Level17":
+				Globalaudio.stop()
+				Globalcombatmusic.stop()
+				Globalcombatmusic.play_music_level(steppin3)
 
 
 func _process(_delta: float) -> void:

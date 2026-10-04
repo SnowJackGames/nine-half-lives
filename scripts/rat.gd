@@ -21,7 +21,6 @@ var ratdamage = preload("res://sound/sfx/OtherDamage.mp3")
 
 
 
-
 const rat_center_offset := Vector2(8,8)
 
 var facing := "Up"

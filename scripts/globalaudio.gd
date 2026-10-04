@@ -52,17 +52,28 @@ func _play_music_random_start( music: AudioStream, volume = 0.0):
 	
 func play_music_level(track, volume = 0.0):
 		_play_music(track,volume)
+		
+func _play_music_from(time, music: AudioStream, volume = 0.0):
+	if stream == music:
+		return
+		
+	stream = music 
+	volume_db = volume
+	play(time)
+
+func play_music_from_time(track, time, volume = 0.0):
+		_play_music_from(time, track, volume)
 
 func play_music_level_random_start(track, volume = 0.0):
 		_play_music_random_start(track,volume)
 		
-func play_FX(given_stream: AudioStream, volume = 0.0):
+func play_FX(given_stream: AudioStream, volume = 0.0, offset = 0.0):
 	var fx_player = AudioStreamPlayer.new()
 	fx_player.stream = given_stream
 	fx_player.name = "FX_PLAYER"
 	fx_player.volume_db = volume
 	add_child(fx_player)
-	fx_player.play()
+	fx_player.play(offset)
 	
 	await fx_player.finished
 	

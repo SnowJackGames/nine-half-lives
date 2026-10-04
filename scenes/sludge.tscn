@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://d26qyve1clpd2" path="res://art/sludge/river1.png" id="4_ppeti"]
 [ext_resource type="Texture2D" uid="uid://cm4bijf7whbwr" path="res://art/sludge/river-end1.png" id="5_7wx6e"]
 [ext_resource type="Texture2D" uid="uid://dnxwxn85k4che" path="res://art/sludge/side2.png" id="6_f8oad"]
+[ext_resource type="AudioStream" uid="uid://ik7hxu2wriq4" path="res://sound/sfx/ToxicGoop-001.mp3" id="9_ppeti"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nish5"]
 size = Vector2(16, 16)
@@ -60,3 +61,12 @@ shape = SubResource("RectangleShape2D_nish5")
 z_index = -1
 tile_map_data = PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 tile_set = SubResource("TileSet_74qev")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1178943595]
+stream = ExtResource("9_ppeti")
+volume_db = 4.35
+autoplay = true
+max_distance = 110.0
+attenuation = 1.7411014
+panning_strength = 2.08
+bus = &"SFX"

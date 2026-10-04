@@ -1,5 +1,6 @@
 extends Control
 
+const SFXmenuclick = preload("res://sound/sfx/MenuClick.mp3")
 
 @onready var menu_index = 0
 @onready var atlas = $CanvasLayer/menu.texture
@@ -34,23 +35,28 @@ func menu_navigation():
 
 #this handles key input
 func _process(_delta:float):
+	
 	if Input.is_action_just_pressed("ui_up"):
+		Globalaudio.play_FX(SFXmenuclick,-5.0)
 		if menu_index >= 1:
 			menu_index -= 1
 		elif menu_index == 0:
 			menu_index = 3
 		menu_navigation()
 	elif Input.is_action_just_pressed("ui_down"):
+		Globalaudio.play_FX(SFXmenuclick,-5.0)
 		if menu_index <= 2:
 			menu_index += 1
 		elif menu_index == 3:
 			menu_index = 0
 		menu_navigation()
 	elif Input.is_action_just_pressed("ui_cancel"):
+		Globalaudio.play_FX(SFXmenuclick,-5.0)
 		menu_index = 0
 		$CanvasLayer/controls.hide()
 		menu_navigation()
 	elif Input.is_action_just_pressed("ui_close_dialog"):
+		Globalaudio.play_FX(SFXmenuclick,-5.0)
 		if menu_index != 0:
 			menu_index = 0
 			$CanvasLayer/controls.hide()
@@ -58,6 +64,7 @@ func _process(_delta:float):
 		else:
 			game_resume.emit()
 	elif Input.is_action_just_pressed("ui_accept"):
+		Globalaudio.play_FX(SFXmenuclick,-5.0)
 		if menu_index == 0:
 			game_resume.emit()
 		elif menu_index == 1:

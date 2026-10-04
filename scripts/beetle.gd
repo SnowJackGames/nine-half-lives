@@ -15,6 +15,13 @@ extends CharacterBody2D
 @onready var is_enemy := true
 @onready var is_alive : bool
 
+var bugattack = preload("res://sound/sfx/BugSpray.mp3")  
+var bugdeath = preload("res://sound/sfx/BugDeath.mp3")  
+var bugsteps = preload("res://sound/sfx/BugSteps-glued.mp3")  
+var bugdamage = preload("res://sound/sfx/OtherDamage.mp3")  
+
+
+
 const beetle_center_offset := Vector2(8,8)
 
 var facing := "Up"
@@ -269,6 +276,7 @@ func attack_hint() -> void:
 			await get_tree().create_timer(0.1).timeout
 
 func attack() -> void:
+	Globalaudio.play_FX(bugattack)
 	sprite.animation = direction_slash_animation[eight_direction_to_four_directions[facing]]
 	sprite.frame = 0
 	await get_tree().create_timer(0.15).timeout
@@ -290,6 +298,7 @@ func attack() -> void:
 	FinishedPhase.emit()
 		
 func move(pos: Vector2):
+	Globalaudio.play_FX(bugsteps)
 	sprite.animation = directional_walk_animations[eight_direction_to_four_directions[facing]]
 	$MoveHint.global_position = pos
 	$MoveHint.show()
@@ -370,6 +379,7 @@ func where_can_be_pushed(source_direction) -> Variant:
 
 func take_damage (damage : int):
 	if damage > 0:
+		Globalaudio.play_FX(bugdeath)
 		$AttackHint.hide()
 		$AttackHint2.hide()
 		$AttackHint3.hide()
