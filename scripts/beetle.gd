@@ -5,6 +5,7 @@ extends CharacterBody2D
 
 @onready var tile_detection : Marker2D = $TileDetection
 @onready var sprite : AnimatedSprite2D = $AnimatedSprite2D
+@onready var initial_position := position
 
 @onready var pounceoverable := true
 @onready var slashthroughable := false
@@ -132,13 +133,20 @@ func end_turn() -> void:
 	pass
 	
 func _ready() -> void:
-	is_alive = true
-	cur_health = 3
+	reset_status()
+	
+func reset_status() -> void:
+	position = initial_position
 	$MoveHint.hide()
 	$AttackHint.hide()
 	$AttackHint2.hide()
 	$AttackHint3.hide()
 	$AttackHint4.hide()
+	show()
+	is_alive = true
+	facing = "Up"
+	sprite.animation = directional_walk_animations[facing]
+	cur_health = 3
 
 # Determine if beetle should move, then declare attack
 func phase_one() -> void:

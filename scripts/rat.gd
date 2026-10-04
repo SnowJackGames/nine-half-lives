@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 @onready var tile_detection : Marker2D = $TileDetection
 @onready var sprite : AnimatedSprite2D = $AnimatedSprite2D
+@onready var initial_position := position
 
 @onready var pounceoverable := true
 @onready var slashthroughable := false
@@ -110,13 +111,18 @@ func end_turn() -> void:
 	pass
 	
 func _ready() -> void:
-	is_alive = true
-	cur_health = 5
+	reset_status()
+	
+func reset_status() -> void:
+	position = initial_position
 	$MoveHint.hide()
 	$AttackHint.hide()
 	$AttackHint2.hide()
 	show()
+	is_alive = true
+	facing = "Up"
 	sprite.animation = directional_walk_animations[facing]
+	cur_health = 5
 
 # Determine if rat should either bump slash, or move then declare attack
 func phase_one() -> void:
@@ -166,8 +172,9 @@ func phase_one() -> void:
 				await get_tree().create_timer(0.10).timeout
 				sprite.animation = directional_walk_animations[eight_direction_to_four_directions[facing]]
 				await player.take_damage(player.cornered_damage)
-				await player.take_damage(bump_slash_damage)
 				$AttackHint.hide()
+				if !Globals.GameManager.should_abandon_turn():
+					await player.take_damage(bump_slash_damage)
 		if !Globals.GameManager.should_abandon_turn():
 			# Then they damage themselves
 			await take_damage(bump_slash_damage)

@@ -98,8 +98,8 @@ func attempt_move(valid_dir) -> void:
 								break
 			await player.get_tree().create_timer(0.08).timeout
 		await Globals.inputs_clear()
+		player.can_move = false
 		if should_move:
-			player.can_move = false
 			enact_move(player.dir_inputs[player.directional_facing.find_key(player.facing)] * Globals.grid_size * 1)
 		else:
 			move_hint([], false)

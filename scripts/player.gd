@@ -41,6 +41,7 @@ var max_health : int
 signal FinishedTurn
 signal FinishedMove
 signal FinishedAction
+signal damaged(current_health, max_health)
 
 #region Input Dictionaries
 static var key_inputs := [
@@ -115,22 +116,9 @@ func end_turn():
 	can_move = false
 	can_action = false
 	just_took_damage = false
-	
-func reset_status() -> void:
-	cur_health = 15
-	max_health = 15
-	on_level_exit = false
-	Debug.say("Full health!")
-	facing = "Up"
-	sprite.animation = directional_walk_animations[directional_facing.find_key(facing)]
 
 func _ready() -> void:
-	$Targetting/Pounce.hide()
-	$Targetting/Slash.hide()
-	$Targetting/Move.hide()
-	$Targetting/Knight.hide()
-	facing = ""
-	turn_over = true
+	max_health = 15
 	move.player = self
 	move.tile_detection = tile_detection
 	slash.player = self
@@ -139,6 +127,19 @@ func _ready() -> void:
 	pounce.tile_detection = tile_detection
 	knight.player = self
 	knight.tile_detection = tile_detection
+	reset_status()
+
+func reset_status() -> void:
+	$Targetting/Pounce.hide()
+	$Targetting/Slash.hide()
+	$Targetting/Move.hide()
+	$Targetting/Knight.hide()
+	turn_over = true
+	on_level_exit = false
+	facing = "Up"
+	sprite.animation = directional_walk_animations[directional_facing.find_key(facing)]
+	cur_health = 15
+	Debug.say("Full health!")
 
 func main_turn_loop() -> void:
 	while !turn_over:
@@ -323,6 +324,7 @@ func take_damage (damage : int):
 	if damage > 0:
 		Globalaudio.play_FX(catdamage_fx)
 		cur_health -= damage
+		damaged.emit(cur_health, max_health)
 		# Take damage animation
 		var prev_animation = sprite.animation
 		sprite.animation = directional_hurt_animations[directional_facing.find_key(facing)]

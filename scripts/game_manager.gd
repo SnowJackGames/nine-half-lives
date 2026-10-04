@@ -2,7 +2,7 @@ extends Node2D
 
 @onready var levels_scene : Node2D = $Levels
 @onready var current_level : Node2D
-@onready var current_level_index := -1
+@onready var current_level_index := 0
 
 @onready var player_character: CharacterBody2D = $Player
 @onready var ai_enemy : CharacterBody2D
@@ -12,6 +12,7 @@ extends Node2D
 @onready var pause_menu = $PauseMenu/CanvasLayer
 @onready var pause_menu_node = $PauseMenu
 @onready var paused = false
+@onready var turn_running = false
 
 signal FinishedTurnCycle
 
@@ -39,6 +40,7 @@ var reloading : bool
 ## [br]Attempts to abandon running any phases or moving automatically to next turn
 ## [br] if player health <= 0, or if we sent a signal to restart the level.
 func next_turn() -> void:
+	turn_running = true
 	Debug.say("starting turn")
 	
 	#region Enemy Phases
@@ -53,6 +55,7 @@ func next_turn() -> void:
 	else:
 		Debug.say("abandoning turn\n--------")
 		await get_tree().create_timer(0.01).timeout
+		turn_running = false
 		FinishedTurnCycle.emit()
 		return
 	#endregion
@@ -66,12 +69,13 @@ func next_turn() -> void:
 			Globals.game_mode = 1
 	
 		# Player turn
-		player_character.begin_turn()
+		await player_character.begin_turn()
 		await player_character.FinishedTurn
-		player_character.end_turn()
+		await player_character.end_turn()
 	else:
 		Debug.say("abandoning turn\n--------")
 		await get_tree().create_timer(0.01).timeout
+		turn_running = false
 		FinishedTurnCycle.emit()
 		return
 	#endregion
@@ -88,6 +92,7 @@ func next_turn() -> void:
 	else:
 		Debug.say("abandoning turn\n--------")
 		await get_tree().create_timer(0.01).timeout
+		turn_running = false
 		FinishedTurnCycle.emit()
 		return
 	#endregion
@@ -104,6 +109,7 @@ func next_turn() -> void:
 	else:
 		Debug.say("abandoning turn\n--------")
 		await get_tree().create_timer(0.01).timeout
+		turn_running = false
 		FinishedTurnCycle.emit()
 		return
 
@@ -146,38 +152,43 @@ func enemy_phase_two() -> void:
 				#ai enacts attack
 				ai.attack()
 				await ai.FinishedPhase
-				ai.end_turn()
+				await ai.end_turn()
 				# If player dies or we're restarting, abandon turn
 				if should_abandon_turn():
 					return
 				else:
 					await get_tree().create_timer(randf_range(0.1, 0.2)).timeout # random slight delay btwn enemy turns
 
-func reload_level():
+func reload_level(from_game_over := false):
 	await unpause_game()
 	player_character.just_took_damage = false
 	reloading = true
 	# Wait for current turn to be cleaned up
-	await FinishedTurnCycle
+	while turn_running:
+		await get_tree().create_timer(0.1).timeout
+		
 	# Now, reload things
 	Debug.say("resetting")
-	game_over_player.play_game_over()
-	# Wait until fade to black before moving stuff around
-	await get_tree().create_timer(1).timeout
-	current_level.visible = false
-	player_character.reset_status()
-	player_character.position = current_level.player_start_position
-	update_camera_target()
+	
+	if from_game_over:
+		await get_tree().create_timer(1.5).timeout
+		game_over_player.play_game_over()
+		await game_over_player.animation_finished
+	else:
+		game_over_player.play_fade_out()
+		await game_over_player.animation_finished
+		
+	# Now we are currently blacked out
+	await load_level(current_level_index)
+	
 	# Finished reloading, now resume process
-	current_level.visible = true
-	var walls = get_node("Levels/" + levels_scene.level_order[current_level_index].name + "/Elements/WallTiles")
-	if walls != null:
-		walls.collision_enabled = true
+	game_over_player.play_fade_in()
+	await game_over_player.animation_finished
+	game_over_player.clean_up()
+	
 	reloading = false
-	# Wait until fade back in
-	await get_tree().create_timer(1).timeout
+	await get_tree().create_timer(0.1).timeout
 	next_turn()
-	#enemies need to be reset, too
 
 func pause_game():
 	await get_tree().create_timer(.05).timeout
@@ -196,20 +207,6 @@ func unpause_game():
 	pause(pause_menu_node)
 
 func increment_active_level() -> void:
-	player_character.reset_status()
-
-	if current_level != null:
-		#print(levels_scene.level_order[current_level_index].name)
-		#print("Levels/" + levels_scene.level_order[current_level_index].name + "/Elements/WallTiles")
-		var walls = get_node("Levels/" + levels_scene.level_order[current_level_index].name + "/Elements/WallTiles")
-		if walls != null:
-			walls.collision_enabled = false
-	
-		
-
-		current_level.visible = false
-		current_level.process_mode = Node.PROCESS_MODE_DISABLED
-	
 	current_level_index += 1
 	
 	if current_level_index >= levels_scene.level_order.size():
@@ -217,57 +214,78 @@ func increment_active_level() -> void:
 		get_tree().quit()
 	
 	else:
-		current_level = get_node("Levels/" + str(levels_scene.level_order[current_level_index]))
-		current_level.visible = true
-		var walls = get_node("Levels/" + levels_scene.level_order[current_level_index].name + "/Elements/WallTiles")
+		await load_level(current_level_index)
+
+
+func load_level(index : int) -> void:
+	# Unload whatever level is currently up
+	var walls : Node2D
+	if current_level:
+		walls = get_node("Levels/" + levels_scene.level_order[current_level_index].name + "/Elements/WallTiles")
 		if walls != null:
-			walls.collision_enabled = true
-		current_level.process_mode = Node.PROCESS_MODE_INHERIT
-		
-		# Move player to starting position of level
-		player_character.position = current_level.player_start_position
+			walls.collision_enabled = false
+		current_level.visible = false
+		current_level.process_mode = Node.PROCESS_MODE_DISABLED
+	
+	player_character.reset_status()
+	current_level = get_node("Levels/" + str(levels_scene.level_order[index]))
+	current_level.visible = true
+	walls = get_node("Levels/" + levels_scene.level_order[index].name + "/Elements/WallTiles")
+	if walls != null:
+		walls.collision_enabled = true
+	current_level.process_mode = Node.PROCESS_MODE_INHERIT
+	
+	# Move player to starting position of level
+	player_character.position = current_level.player_start_position
 	update_camera_target()
-	if current_level.name == "Tutorial1": 
-		Globalaudio.playVolume(0.35)
-		Globalaudio.fadeInTime(8.0)
-		Globalaudio.play_music_level_random_start(fell,-10.0)
-		Globalambienceplayer.playVolume(0.75)
-		Globalambienceplayer.play_music_level_random_start(ambience1)
-	if current_level.name == "Level1": 
-		Globalaudio.fadeInTime(0.5)
-		Globalambienceplayer.fadeInTime(15.0)
-		Globalaudio.toggle()
-		Globalambienceplayer.toggle()
-		#Globalcombatmusic.playVolume(0.7)
-		#Globalcombatmusic.fadeInTime(4)
-		Globalcombatmusic.fadeInTime(0.0)
-		Globalcombatmusic.play_music_level(steppin)
-		
-	if current_level.name == "Level5": 
-		Globalaudio.playVolume(0.35)
-		Globalaudio.fadeInTime(8.0)
-		Globalaudio.play_music_level_random_start(spurr,-10.0)
-		Globalaudio.fadeInTime(0.1)
-		Globalambienceplayer.playVolume(0.75)
-		Globalambienceplayer.play_music_level_random_start(ambience1)
-		
-	if current_level.name == "Level6": 
-		Globalaudio.play_music_level(teeter)
-	if current_level.name == "Exploration2": 
-		Globalaudio.play_music_level(opening)
-	if current_level.name == "Level8": 
-		Globalaudio.play_music_level(teeter)
-	if current_level.name == "Exploration3": 
-		Globalaudio.play_music_level(magenta)
-	if current_level.name == "Level12": 
-		Globalaudio.play_music_level(spurr)
-	if current_level.name == "Level13": 
-		Globalaudio.play_music_level(blurr)
-	if current_level.name == "Level15": 
-		Globalaudio.play_music_level(emerald)
+	
+	# reset status of AI units
+	for child in current_level.find_children("*", "CharacterBody2D"):
+		if "is_enemy" in child or child.get("is_enemy"):
+			child.reset_status()
+	
+	# Audio
+	if !reloading:
+		if current_level.name == "Tutorial1":
+			Globalaudio.playVolume(0.35)
+			Globalaudio.fadeInTime(8.0)
+			Globalaudio.play_music_level_random_start(fell,-10.0)
+			Globalambienceplayer.playVolume(0.75)
+			Globalambienceplayer.play_music_level_random_start(ambience1)
+		if current_level.name == "Level1":
+			Globalaudio.fadeInTime(0.5)
+			Globalambienceplayer.fadeInTime(15.0)
+			Globalaudio.toggle()
+			Globalambienceplayer.toggle()
+			#Globalcombatmusic.playVolume(0.7)
+			#Globalcombatmusic.fadeInTime(4)
+			Globalcombatmusic.fadeInTime(0.0)
+			Globalcombatmusic.play_music_level(steppin)
+			
+		if current_level.name == "Level5":
+			Globalaudio.playVolume(0.35)
+			Globalaudio.fadeInTime(8.0)
+			Globalaudio.play_music_level_random_start(spurr,-10.0)
+			Globalaudio.fadeInTime(0.1)
+			Globalambienceplayer.playVolume(0.75)
+			Globalambienceplayer.play_music_level_random_start(ambience1)
+			
+		if current_level.name == "Level6":
+			Globalaudio.play_music_level(teeter)
+		if current_level.name == "Exploration2":
+			Globalaudio.play_music_level(opening)
+		if current_level.name == "Level8":
+			Globalaudio.play_music_level(teeter)
+		if current_level.name == "Exploration3":
+			Globalaudio.play_music_level(magenta)
+		if current_level.name == "Level12":
+			Globalaudio.play_music_level(spurr)
+		if current_level.name == "Level13":
+			Globalaudio.play_music_level(blurr)
+		if current_level.name == "Level15":
+			Globalaudio.play_music_level(emerald)
 	
 	await get_tree().create_timer(0.1).timeout
-
 
 func update_camera_target() -> void: 	
 	$Player/RemoteTransform2D.remote_path = NodePath("")  
@@ -304,9 +322,13 @@ func calc_ai_array() -> void:
 			if "is_alive" in child:
 				if !child.is_alive:
 					# remove the entity, then wait one frame for it to disappear
-					child.queue_free()
+					child.hide()
+					child.process_mode = Node.PROCESS_MODE_DISABLED
 					await get_tree().process_frame
 				else:
+					child.show()
+					child.process_mode = Node.PROCESS_MODE_INHERIT
+					await get_tree().process_frame
 					unsorted_array.append(child)
 
 	# sort them left to right, top to bottom
@@ -314,6 +336,7 @@ func calc_ai_array() -> void:
 	ai_array = unsorted_array
 	
 	# returns the int representing the current level index
+
 func load_game() -> int:
 	var file = FileAccess.open("user://save.save", FileAccess.READ)
 	if not FileAccess.file_exists("user://save.save"):
@@ -335,32 +358,24 @@ func _ready() -> void:
 	reloading = false
 	pause_menu_node.game_resume.connect(unpause_game)
 	pause_menu_node.reload_room.connect(reload_level)
+	player_character.damaged.connect(_on_player_damaged)
 	pause_menu.hide()
 	pause(pause_menu_node)
 	show()
 	levels_scene.show()
 	player_character.show()
-	await increment_active_level()
+	await load_level(current_level_index)
 	next_turn()
 
 	
-# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _on_player_damaged(current_health: int, max_health: int) -> void:
+	Debug.say("Health: %s / %s" % [current_health, max_health])
+	
+	if Globals.GameManager.should_abandon_turn():
+		reload_level(true)
+
+
 func _process(_delta: float) -> void:
-	# Player Damage. Want to make sure we aren't in a situation where mid-reset we "die"
-	if player_character.just_took_damage and !Globals.GameManager.should_abandon_turn():
-		set_process(false)
-		player_character.just_took_damage = false
-		Debug.say("Health: %s / %s" % [player_character.cur_health, player_character.max_health])
-		# Game Over
-		if player_character.cur_health <= 0:
-			pause($Levels)
-			pause($Player)
-			await get_tree().create_timer(1.5).timeout
-			game_over_player.play_game_over()
-			print("You Died!")
-			game_over_player.load_room.connect(reload_level)
-		await get_tree().create_timer(0.1).timeout 
-		set_process(true)
-	elif Input.is_action_just_pressed("ui_close_dialog") and !Globals.GameManager.should_abandon_turn():
+	if Input.is_action_just_pressed("ui_close_dialog") and !Globals.GameManager.should_abandon_turn():
 		if paused == false:
 			pause_game()
