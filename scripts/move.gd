@@ -17,6 +17,10 @@ func declare_move() -> void:
 	if !valid_dir.is_empty():
 		# In Combat
 		if Globals.game_mode == 2:
+			# Make sure we're not facing an illegal direction
+			if !valid_dir.has(player.facing):
+				player.facing = valid_dir[randi_range(0, (valid_dir.size() - 1))]
+				player.sprite.animation = player.directional_walk_animations[player.facing]
 			move_hint(valid_dir, true)
 		attempt_move(valid_dir)
 	
@@ -61,87 +65,46 @@ func attempt_move(valid_dir) -> void:
 	#Combat
 	elif Globals.game_mode == 2:
 		Globals.ui.move_combat_hover()
-		var can_process_move := false
+		var chose_option := false
 		var should_move := false
-		var confirmMove = false
-		var facing2
-		
-		while !can_process_move and !confirmMove:
-			if Input.is_action_pressed("ui_cancel"):
-				print("skip")
-				move_hint([], false)
-				player.can_move = false
-				can_process_move = true
-				confirmMove = false
-				player.FinishedMove.emit()
-			for dir in player.dir_inputs.keys():
-				if Input.is_action_pressed(dir) and valid_dir.has(player.directional_facing[dir]):
-					# face correct direction, update move_hint
-					player.sprite.animation = player.directional_walk_animations[dir]
-					player.facing = player.directional_facing[dir]
-					facing2 = dir 
-					move_hint(valid_dir, true)
-					confirmMove = true
-					print("stage1: " + dir)
-					#await player.get_tree().create_timer(0.05).timeout
-					
-			for dir in player.dir_inputs.keys():
-				if Input.is_action_just_released(dir):
-					print(dir)
-				
-		
-			# pressing (A) while player.facing a valid direction
-			#if Input.is_action_pressed("ui_accept") and player.facing in valid_dir:
-			#for dir in player.dir_inputs.keys():
-				#if Input.is_action_pressed(dir) and player.facing in valid_dir:
-			
-			
-			
-			
-			await player.get_tree().create_timer(0.1).timeout
+		var tapped_dir : String
 		await Globals.inputs_clear()
 		
-		
-		while confirmMove == true and should_move == false:
-			if Input.is_action_pressed("ui_cancel"):
-				print("skip")
-				can_process_move = true
-				confirmMove = false
-				move_hint([], false)
-				player.can_move = false
-				player.FinishedMove.emit()
-			for dir in player.dir_inputs.keys():
-				if Input.is_action_pressed(dir) and facing2 == dir and valid_dir.has(player.directional_facing[dir]):
-					#hide the combat move UI
-						should_move = true
-						can_process_move = true
-						confirmMove = false
-						facing2 = null
-						print("stage2 success:" + dir)
-						#await get_tree().create_timer(0.05).timeout
-						move_hint([], false)
-						player.can_move = false
-						if should_move:
-							enact_move(player.dir_inputs[player.directional_facing.find_key(player.facing)] * Globals.grid_size * 1)
-						else:
-							player.FinishedMove.emit()
-				elif Input.is_action_pressed(dir) and facing2 != dir:
-						print("stage2 fail" + dir)
-						facing2 = null
-						should_move = false
-						can_process_move = false
-						confirmMove = false
-						move_hint([], false)
-						player.can_move = false
-						declare_move()
-				# pressing (B) skips movement
-			
-						
-						
-			await player.get_tree().create_timer(0.1).timeout
+		while !chose_option and !Globals.GameManager.should_abandon_turn():
+			# Don't process while paused
+			if Globals.GameManager.paused:
+				pass
+			else:
+				if Input.is_action_pressed("ui_cancel") and !Input.is_action_pressed("ui_accept"):
+					chose_option = true
+					should_move = false
+				elif Input.is_action_pressed("ui_accept") and !Input.is_action_pressed("ui_cancel"):
+					chose_option = true
+					should_move = true
+				else:
+					for dir in player.dir_inputs.keys():
+						if Input.is_action_pressed(dir):
+							if player.directional_facing[dir] in valid_dir:
+								player.facing = player.directional_facing[dir]
+								player.sprite.animation = player.directional_walk_animations[dir]
+								move_hint(valid_dir, true)
+								# Can tap twice in same direction to confirm
+								if tapped_dir == dir:
+									chose_option = true
+									should_move = true
+								else:
+									tapped_dir = dir
+								await Globals.inputs_clear()
+								break
+			await player.get_tree().create_timer(0.08).timeout
 		await Globals.inputs_clear()
-		
-		
+		if should_move:
+			player.can_move = false
+			enact_move(player.dir_inputs[player.directional_facing.find_key(player.facing)] * Globals.grid_size * 1)
+		else:
+			move_hint([], false)
+			player.FinishedMove.emit()
+
 	
 	else:
 		
@@ -169,6 +132,7 @@ func move_hint(valid_dir: Array, shouldload: bool) -> void:
 		player.get_node(move_ui).hide()
 
 func enact_move(vector_pos: Vector2):
+	move_hint([], false)
 	if Globals.game_mode == 1:
 		player.can_action = false
 	player.sprite.animation = player.directional_walk_animations[player.directional_facing.find_key(player.facing)]
