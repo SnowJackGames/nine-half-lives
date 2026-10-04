@@ -165,7 +165,7 @@ func phase_one() -> void:
 	# For every direction, figure out the closest and furthest tile to player
 	for direction in direction_dictionary:
 		tile_detection_check = direction_dictionary[direction] * Globals.grid_size + position + beetle_center_offset
-		if tile_detection.moveonable(tile_detection_check) and !tile_detection.tile_damage_ground(tile_detection_check):
+		if tile_detection.moveonable(tile_detection_check):
 			# replace with closer spot
 			if tile_detection_check.distance_to(player.position + beetle_center_offset) < closest_distance_to_player:
 				closest_tile_to_player = tile_detection_check

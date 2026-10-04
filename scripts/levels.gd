@@ -11,9 +11,16 @@ const teeter = preload("res://sound/music/Teeter.mp3")
 
 
 @onready var level_order = [
-	
-	
-	
+	$Tutorial1,
+	$Exploration0,
+	$Level1,
+	$Level2,
+	$Level3,
+	$Level4,
+	$Level5,
+	$Exploration1,
+	$Level6,
+	$Level7,
 	$Exploration2,
 	$Level8,
 	$Level9,
@@ -27,18 +34,6 @@ const teeter = preload("res://sound/music/Teeter.mp3")
 	$Level16,
 	$Level17,
 	$Level18,
-	
-	$Tutorial1,
-	$Exploration0,
-	$Level1,
-	$Level2,
-	$Level3,
-	$Level4,
-	$Level5,
-	$Exploration1,
-	$Level6,
-	$Level7,
-	
 ]
 
 
